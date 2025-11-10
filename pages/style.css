@@ -20,6 +20,21 @@
   .compact-search { position:relative; }
   .compact-search input { width:160px; padding:6px 10px; border-radius:8px; border:1px solid #e6e6e6; outline:none; font-size:13px; }
   .compact-search input:focus { box-shadow:0 0 0 3px rgba(37,99,235,0.08); border-color:var(--accent); }
+
+  /* visibility helpers */
+  .mobile-only { display:none; }
+  .desktop-only { display:inline-flex; }
+
+  /* filter popup for mobile */
+  .filter-menu { position:fixed; top:56px; right:12px; background:var(--card); border:1px solid #e6e6e6; border-radius:8px; padding:6px 8px; box-shadow:0 6px 20px rgba(0,0,0,0.12); z-index:1200; display:none; flex-direction:column; }
+  .filter-menu .fm-item { padding:8px 12px; border:none; background:transparent; text-align:left; font-size:14px; color:#111; cursor:pointer; }
+  .filter-menu .fm-item:hover { background:#f6f9ff; color:var(--accent); }
+
+  /* search FAB and overlay for mobile */
+  .search-fab { position:fixed; top:calc(10px + env(safe-area-inset-top)); right:16px; width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,0.7); backdrop-filter:blur(6px); border:1px solid rgba(0,0,0,0.06); display:flex; align-items:center; justify-content:center; z-index:1300; }
+  .search-overlay { position:fixed; top:calc(10px + env(safe-area-inset-top)); right:16px; display:none; align-items:center; gap:8px; padding:6px 8px; border-radius:24px; background:rgba(255,255,255,0.95); box-shadow:0 8px 30px rgba(0,0,0,0.12); z-index:1300; }
+  .search-overlay input { width:220px; padding:8px 10px; border-radius:16px; border:1px solid #e6e6e6; outline:none; }
+
   .menu button { background:var(--card); border:1px solid #e5e7eb; padding:8px 12px; border-radius:8px; cursor:pointer; }
   .menu button.active { background:var(--accent); color:#fff; border-color:var(--accent); }
   #player { position:fixed; top:-9999px; }
@@ -84,11 +99,20 @@
   .timer-cancel-btn:hover { background:#dc2626; }
 
   @media (max-width:480px) {
-    .song-info-scroll { max-width:150px; }
+    .song-info_scroll { max-width:150px; }
     .mini-player-content { padding:8px 12px; gap:8px; }
     .play-mode-btn, .recent-list-btn { width:36px; height:36px; font-size:18px; }
-    .menu-bar { flex-direction:column; align-items:flex-start; }
-    .top-controls { width:100%; gap:6px; }
+    .menu-bar { flex-direction:row; align-items:center; }
+    .top-controls { width:auto; gap:6px; }
     .compact-search input { width:120px; }
+
+    /* mobile visibility rules */
+    .mobile-only { display:inline-flex; }
+    .desktop-only { display:none; }
+    /* hide list count on mobile */
+    .list-count { display:none; }
+    /* filter menu layout on very small screens */
+    .filter-menu { right:8px; left:8px; top:60px; border-radius:10px; }
+    .search-overlay input { width: calc(100vw - 140px); max-width:260px; }
   }
   

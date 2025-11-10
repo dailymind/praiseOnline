@@ -31,8 +31,14 @@
     const progressFill = document.querySelector('.progress-fill');
     // Controls
     const filterControl = document.getElementById('filterControl');
+    const filterMenuBtn = document.getElementById('filterMenuBtn');
+    const filterMenu = document.getElementById('filterMenu');
     const sortToggleBtn = document.getElementById('sortToggleBtn');
-    const searchInput = document.getElementById('searchInput');
+    const searchInputDesktop = document.getElementById('searchInputDesktop');
+    const searchInputMobile = document.getElementById('searchInputMobile');
+    const searchFab = document.getElementById('searchFab');
+    const searchOverlay = document.getElementById('searchOverlay');
+    const searchBack = document.getElementById('searchBack');
     const listCountEl = document.getElementById('listCount');
   
     // Worker API 域名：从页面 meta 标签读取，若未设置则回退到默认
@@ -232,18 +238,43 @@
 
     // initialize controls state
     function initControls() {
-      // filter
-      const btns = filterControl.querySelectorAll('button');
-      btns.forEach(b => {
-        b.classList.toggle('active', b.dataset.filter === filterMode);
-        b.addEventListener('click', () => {
-          btns.forEach(x => x.classList.remove('active'));
-          b.classList.add('active');
-          filterMode = b.dataset.filter;
-          localStorage.setItem('praise_filterMode', filterMode);
-          applyFiltersAndSearch(); renderList();
+      // filter - desktop segmented
+      if (filterControl) {
+        const btns = filterControl.querySelectorAll('button');
+        btns.forEach(b => {
+          b.classList.toggle('active', b.dataset.filter === filterMode);
+          b.addEventListener('click', () => {
+            btns.forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            filterMode = b.dataset.filter;
+            localStorage.setItem('praise_filterMode', filterMode);
+            applyFiltersAndSearch(); renderList();
+          });
         });
-      });
+      }
+
+      // filter - mobile menu
+      if (filterMenuBtn && filterMenu) {
+        filterMenuBtn.addEventListener('click', (e) => {
+          const open = filterMenu.style.display === 'flex';
+          filterMenu.style.display = open ? 'none' : 'flex';
+          filterMenuBtn.setAttribute('aria-expanded', (!open).toString());
+        });
+        const items = filterMenu.querySelectorAll('.fm-item');
+        items.forEach(it => {
+          it.addEventListener('click', () => {
+            filterMode = it.dataset.filter;
+            // reflect on desktop segmented if present
+            if (filterControl) {
+              filterControl.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.filter === filterMode));
+            }
+            localStorage.setItem('praise_filterMode', filterMode);
+            applyFiltersAndSearch(); renderList();
+            filterMenu.style.display = 'none';
+            filterMenuBtn.setAttribute('aria-expanded', 'false');
+          });
+        });
+      }
 
       // sort
       sortToggleBtn.setAttribute('aria-pressed', reverseOrder ? 'true' : 'false');
@@ -254,17 +285,55 @@
         applyFiltersAndSearch(); renderList();
       });
 
-      // search (debounced)
-      searchInput.value = searchQuery || '';
+      // search (debounced) - wire desktop and mobile inputs
       const doSearch = debounce(() => {
-        searchQuery = searchInput.value || '';
+        // prefer desktop input value if present, otherwise mobile
+        const val = (searchInputDesktop && searchInputDesktop.value) ? searchInputDesktop.value : (searchInputMobile && searchInputMobile.value ? searchInputMobile.value : '');
+        searchQuery = val || '';
         localStorage.setItem('praise_searchQuery', searchQuery);
         applyFiltersAndSearch(); renderList();
       }, 220);
-      searchInput.addEventListener('input', doSearch);
-      // keyboard shortcut: '/' focus
+      if (searchInputDesktop) {
+        searchInputDesktop.value = searchQuery || '';
+        searchInputDesktop.addEventListener('input', doSearch);
+      }
+      if (searchInputMobile) {
+        searchInputMobile.value = searchQuery || '';
+        searchInputMobile.addEventListener('input', doSearch);
+      }
+
+      // search FAB behavior for mobile
+      if (searchFab && searchOverlay && searchInputMobile && searchBack) {
+        searchFab.addEventListener('click', () => {
+          searchOverlay.style.display = 'flex';
+          searchOverlay.setAttribute('aria-hidden', 'false');
+          searchFab.style.display = 'none';
+          setTimeout(() => searchInputMobile.focus(), 50);
+        });
+        searchBack.addEventListener('click', () => {
+          searchOverlay.style.display = 'none';
+          searchOverlay.setAttribute('aria-hidden', 'true');
+          searchFab.style.display = 'flex';
+        });
+      }
+      // keyboard shortcut: '/' focus - open mobile overlay if needed
       document.addEventListener('keydown', (e) => {
-        if (e.key === '/') { e.preventDefault(); searchInput.focus(); }
+        if (e.key === '/') {
+          e.preventDefault();
+          if (searchInputDesktop) searchInputDesktop.focus();
+          else if (searchFab && searchOverlay && searchInputMobile) {
+            searchOverlay.style.display = 'flex'; searchOverlay.setAttribute('aria-hidden', 'false'); searchFab.style.display = 'none'; setTimeout(() => searchInputMobile.focus(), 50);
+          }
+        }
+      });
+      // click outside to close mobile menus/search overlay
+      document.addEventListener('click', (e) => {
+        if (filterMenu && filterMenu.style.display === 'flex' && !filterMenu.contains(e.target) && e.target !== filterMenuBtn) {
+          filterMenu.style.display = 'none'; filterMenuBtn.setAttribute('aria-expanded', 'false');
+        }
+        if (searchOverlay && searchOverlay.style.display === 'flex' && !searchOverlay.contains(e.target) && e.target !== searchFab) {
+          searchOverlay.style.display = 'none'; searchOverlay.setAttribute('aria-hidden', 'true'); searchFab.style.display = 'flex';
+        }
       });
     }
   

@@ -20,16 +20,33 @@
     </div>
 
     <div class="top-controls">
-      <div id="filterControl" class="segmented" aria-label="过滤">
+      <!-- Desktop segmented filter (visible on larger screens) -->
+      <div id="filterControl" class="segmented desktop-only" aria-label="过滤">
         <button data-filter="all" class="active" title="全部">全部</button>
         <button data-filter="only_chorus" title="仅合唱">仅合</button>
         <button data-filter="exclude_chorus" title="排除合唱">排除合</button>
       </div>
 
+      <!-- Mobile filter button (funnel icon) -->
+      <button id="filterMenuBtn" class="icon-btn mobile-only" aria-haspopup="true" aria-expanded="false" title="筛选">🔽</button>
+      <div id="filterMenu" class="filter-menu mobile-only" role="menu" aria-hidden="true">
+        <button role="menuitem" data-filter="all" class="fm-item">全部</button>
+        <button role="menuitem" data-filter="only_chorus" class="fm-item">仅合</button>
+        <button role="menuitem" data-filter="exclude_chorus" class="fm-item">排除合</button>
+      </div>
+
       <button id="sortToggleBtn" class="icon-btn" title="切换排序（正序/倒序）" aria-pressed="false">⇅</button>
 
-      <div id="searchWrap" class="compact-search" aria-label="搜索歌曲">
-        <input id="searchInput" type="search" placeholder="搜索歌曲或编号" aria-label="搜索歌曲或编号" />
+      <!-- Desktop search input -->
+      <div id="searchWrap" class="compact-search desktop-only" aria-label="搜索歌曲">
+        <input id="searchInputDesktop" type="search" placeholder="搜索歌曲或编号" aria-label="搜索歌曲或编号" />
+      </div>
+
+      <!-- Mobile search FAB -->
+      <button id="searchFab" class="search-fab mobile-only" title="搜索">🔍</button>
+      <div id="searchOverlay" class="search-overlay mobile-only" aria-hidden="true">
+        <button id="searchBack" class="icon-btn" title="返回">←</button>
+        <input id="searchInputMobile" type="search" placeholder="搜索歌曲或编号" aria-label="搜索歌曲或编号" />
       </div>
 
       <div id="listCount" class="list-count" aria-hidden="true">--</div>
