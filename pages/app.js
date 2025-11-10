@@ -33,7 +33,11 @@
     // Worker API 域名：从页面 meta 标签读取，若未设置则回退到默认
     // 请在 `pages/index.html` 中添加：<meta name="api-base" content="__API_BASE__" />
     const metaApi = document.querySelector('meta[name="api-base"]');
-    const API_BASE = (metaApi && metaApi.content) ? metaApi.content : 'https://papi.yourdomain.com';
+    let API_BASE = (metaApi && metaApi.content) ? metaApi.content : 'https://papi.yourdomain.com';
+    // 自动补全 https:// 前缀
+    if (!/^https?:\/\//i.test(API_BASE)) {
+      API_BASE = 'https://' + API_BASE;
+    }
 
     // 播放模式图标路径
     const playModeIconPaths = [
