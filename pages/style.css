@@ -98,7 +98,7 @@
   .timer-cancel-btn { width:100%; padding:10px; border:none; border-radius:8px; background:#ef4444; color:#fff; cursor:pointer; font-size:14px; transition:all 0.2s; }
   .timer-cancel-btn:hover { background:#dc2626; }
 
-  @media (max-width:480px) {
+  @media (max-width:768px) {
     .song-info_scroll { max-width:150px; }
     .mini-player-content { padding:8px 12px; gap:8px; }
     .play-mode-btn, .recent-list-btn { width:36px; height:36px; font-size:18px; }
