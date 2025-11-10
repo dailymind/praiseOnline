@@ -30,8 +30,10 @@
     const pauseIcon = playPauseBtn.querySelector('.pause-icon');
     const progressFill = document.querySelector('.progress-fill');
   
-    // Worker API 域名
-    const API_BASE = "https://mapi.ours24.dpdns.org";
+    // Worker API 域名：从页面 meta 标签读取，若未设置则回退到默认
+    // 请在 `pages/index.html` 中添加：<meta name="api-base" content="__API_BASE__" />
+    const metaApi = document.querySelector('meta[name="api-base"]');
+    const API_BASE = (metaApi && metaApi.content) ? metaApi.content : 'https://papi.yourdomain.com';
 
     // 播放模式图标路径
     const playModeIconPaths = [

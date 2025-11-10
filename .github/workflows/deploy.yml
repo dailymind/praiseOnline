@@ -1,0 +1,78 @@
+name: Deploy to Cloudflare
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci || true
+
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
+      - name: Inject Pages API_BASE
+        if: ${{ secrets.API_BASE != '' }}
+        run: |
+          echo "Injecting API_BASE into pages/index.html"
+          sed -i "s|__API_BASE__|${{ secrets.API_BASE }}|g" pages/index.html || true
+
+      - name: Inject Worker placeholders from secrets
+        if: ${{ secrets.BUCKET_NAME != '' || secrets.PREVIEW_BUCKET_NAME != '' || secrets.API_DOMAIN != '' || secrets.ZONE_NAME != '' }}
+        run: |
+          echo "Replacing placeholders in worker/wrangler.toml"
+          # Use provided secrets to replace placeholders in the toml
+          if [ -n "${{ secrets.BUCKET_NAME }}" ]; then
+            sed -i "s|__BUCKET_NAME__|${{ secrets.BUCKET_NAME }}|g" worker/wrangler.toml || true
+          fi
+          if [ -n "${{ secrets.PREVIEW_BUCKET_NAME }}" ]; then
+            sed -i "s|__PREVIEW_BUCKET_NAME__|${{ secrets.PREVIEW_BUCKET_NAME }}|g" worker/wrangler.toml || true
+          fi
+          if [ -n "${{ secrets.API_DOMAIN }}" ]; then
+            sed -i "s|__API_DOMAIN__|${{ secrets.API_DOMAIN }}|g" worker/wrangler.toml || true
+          fi
+          if [ -n "${{ secrets.ZONE_NAME }}" ]; then
+            sed -i "s|__ZONE_NAME__|${{ secrets.ZONE_NAME }}|g" worker/wrangler.toml || true
+          else
+            # If ZONE_NAME not provided, try to derive from API_DOMAIN by removing subdomain
+            if [ -n "${{ secrets.API_DOMAIN }}" ]; then
+              # simple derivation: strip first label
+              derived_zone=$(echo "${{ secrets.API_DOMAIN }}" | awk -F. '{print $(NF-1)"."$NF}')
+              sed -i "s|__ZONE_NAME__|${derived_zone}|g" worker/wrangler.toml || true
+            fi
+          fi
+
+      - name: Deploy Worker
+        working-directory: worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "${CLOUDFLARE_API_TOKEN}" ]; then
+            echo "CLOUDFLARE_API_TOKEN is not set. Skipping Worker deploy.";
+            exit 1;
+          fi
+          npx wrangler publish
+
+      - name: Deploy Pages (optional)
+        if: ${{ secrets.CLOUDFLARE_PAGES_PROJECT_NAME != '' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "${CLOUDFLARE_API_TOKEN}" ]; then
+            echo "CLOUDFLARE_API_TOKEN is not set. Skipping Pages deploy.";
+            exit 1;
+          fi
+          # deploy static site (the workflow may have injected API_BASE into pages/index.html)
+          npx wrangler pages deploy pages --project-name=${{ secrets.CLOUDFLARE_PAGES_PROJECT_NAME }}
