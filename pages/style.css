@@ -30,6 +30,7 @@
   .filter-menu.open { display:flex; }
   .filter-menu .fm-item { padding:8px 12px; border:none; background:transparent; text-align:left; font-size:14px; color:#111; cursor:pointer; }
   .filter-menu .fm-item:hover { background:#f6f9ff; color:var(--accent); }
+  .filter-menu .fm-item.active { background: rgba(37,99,235,0.12); color: var(--accent); border-radius:6px; }
 
   /* search FAB and overlay for mobile */
   .search-fab { position:fixed; top:calc(16px + env(safe-area-inset-top)); right:16px; width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,0.7); backdrop-filter:blur(6px); border:1px solid rgba(0,0,0,0.06); display:flex; align-items:center; justify-content:center; z-index:1300; }
@@ -117,5 +118,25 @@
     /* filter menu layout on very small screens */
     .filter-menu { right:8px; left:8px; top:60px; border-radius:10px; }
     .search-overlay input { width: calc(100vw - 140px); max-width:260px; }
+
+    /* Ensure overlays remain hidden by default on mobile unless explicitly opened
+       .mobile-only rule above makes many mobile-only elements visible; exclude
+       overlay/menu elements so they don't appear on page load. */
+    .mobile-only.search-overlay { display: none; }
+    .mobile-only.search-overlay.open { display: flex; }
+    .mobile-only.filter-menu { display: none; }
+    .mobile-only.filter-menu.open { display: flex; }
   }
+
+/* Prevent iOS Safari auto-zoom on input focus by ensuring inputs have at least 16px font-size
+   and disabling text-size-adjust where appropriate. Keep desktop sizes unchanged. */
+input[type="search"], input[type="text"], textarea, .compact-search input {
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (max-width:768px) {
+  input[type="search"], input[type="text"], textarea, .compact-search input {
+    font-size: 16px; /* iOS won't auto-zoom when font-size >= 16px */
+  }
+}
   
