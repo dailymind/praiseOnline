@@ -268,6 +268,11 @@
         // support touchstart for better responsiveness on mobile
         filterMenuBtn.addEventListener('touchstart', (e) => { e.preventDefault(); toggleFilterMenu(e); });
         const items = filterMenu.querySelectorAll('.fm-item');
+        const syncMobileFilterActive = () => {
+          items.forEach(i => i.classList.toggle('active', i.dataset.filter === filterMode));
+        };
+        // initial sync
+        syncMobileFilterActive();
         items.forEach(it => {
           it.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -275,6 +280,8 @@
             if (filterControl) {
               filterControl.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.filter === filterMode));
             }
+            // sync mobile items visually
+            syncMobileFilterActive();
             localStorage.setItem('praise_filterMode', filterMode);
             applyFiltersAndSearch(); renderList();
             filterMenu.classList.remove('open');
@@ -282,6 +289,8 @@
           });
           it.addEventListener('touchstart', (e) => { e.stopPropagation(); });
         });
+        // when the filter button toggles open, ensure active item is synced
+        filterMenuBtn.addEventListener('click', () => setTimeout(syncMobileFilterActive, 0));
       }
 
       // sort
