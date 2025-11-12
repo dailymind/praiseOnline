@@ -1,0 +1,156 @@
+/* Theme Variables and Styles */
+
+/* Light Theme (default) */
+:root,
+[data-theme="light"] {
+  --accent: #2563eb;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --highlight: #dbeafe;
+  --text-primary: #111111;
+  --text-secondary: #666666;
+  --border: #e6e6e6;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --accent: #3b82f6;
+  --bg: #1f2937;
+  --card: #374151;
+  --muted: #9ca3af;
+  --highlight: #1e3a8a;
+  --text-primary: #f3f4f6;
+  --text-secondary: #d1d5db;
+  --border: #4b5563;
+  color-scheme: dark;
+}
+
+/* VS Code Dark Theme */
+[data-theme="code-dark"] {
+  --accent: #007acc;
+  --bg: #1e1e1e;
+  --card: #252526;
+  --muted: #858585;
+  --highlight: #264f78;
+  --text-primary: #d4d4d4;
+  --text-secondary: #9cdcfe;
+  --border: #3e3e42;
+  color-scheme: dark;
+}
+
+/* Header positioning for theme button - LEFT SIDE */
+header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: 600;
+  flex: 1;
+  text-align: center;
+}
+
+.theme-toggle-header {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffffff;
+  font-size: 18px;
+  z-index: 1500;
+  background: transparent;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.theme-toggle-header:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* Theme Menu positioning - appears below left button */
+.theme-menu {
+  position: fixed;
+  top: calc(var(--header-height) + 8px);
+  left: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  z-index: 1300;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 160px;
+}
+
+.theme-menu.open {
+  display: flex;
+}
+
+.theme-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+
+.theme-item:hover {
+  background: var(--highlight);
+  color: var(--accent);
+}
+
+.theme-item.active {
+  background: var(--highlight);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.theme-preview {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.theme-preview.light {
+  background: #ffffff;
+  border-color: #e6e6e6;
+}
+
+.theme-preview.dark {
+  background: #1f2937;
+  border-color: #4b5563;
+}
+
+.theme-preview.code-dark {
+  background: #007acc;
+}
+
+@media (max-width: 768px) {
+  .theme-menu {
+    left: 8px;
+  }
+
+  .theme-toggle-header {
+    left: 8px;
+  }
+}
