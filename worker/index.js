@@ -27,9 +27,9 @@ export default {
         const list = await env.R2_BUCKET.list({ prefix, limit: 1000 });
         const songs = list.objects
           .filter(o => o.key.endsWith(".mp3"))
-          .map(o => ({ name: o.key.split("/").pop(), key: o.key }));
+          .map(o => o.key.split("/").pop());
         return new Response(JSON.stringify({ songs }, null, 2), {
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             ...corsHeaders,
           },

@@ -171,7 +171,11 @@
         return;
       }
       const data = await res.json();
-      originalSongs = Array.isArray(data.songs) ? data.songs.slice() : [];
+      // Convert string array to object array with name and key
+      originalSongs = Array.isArray(data.songs) ? data.songs.map(name => ({
+        name: name,
+        key: dir + name
+      })) : [];
       // reset local storage on each new fetch
       localStorage.setItem('praise_filterMode', filterMode);
       localStorage.setItem('praise_reverseOrder', reverseOrder);
