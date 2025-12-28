@@ -339,7 +339,7 @@ header {
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--glass-border);
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 1300;
@@ -882,6 +882,10 @@ mark.search-hit {
 
   .mobile-only {
     display: inline-flex;
+  }
+
+  .search-fab {
+    display: flex;
   }
 
   .desktop-only {
