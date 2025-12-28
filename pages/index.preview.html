@@ -61,24 +61,12 @@
       <button id="filterMenuBtn" class="icon-btn mobile-only" aria-haspopup="true" aria-expanded="false" title="筛选">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M3 5h18v2l-7 8v4l-4-2v-2L3 7V5z"/></svg>
       </button>
-      <div id="filterMenu" class="filter-menu mobile-only" role="menu" aria-hidden="true">
-        <button role="menuitem" data-filter="all" class="fm-item">全部</button>
-        <button role="menuitem" data-filter="only_chorus" class="fm-item">仅合</button>
-        <button role="menuitem" data-filter="exclude_chorus" class="fm-item">非合</button>
-      </div>
 
       <button id="sortToggleBtn" class="icon-btn" title="切换排序（正序/倒序）" aria-pressed="false">⇅</button>
 
       <!-- Desktop search input -->
       <div id="searchWrap" class="compact-search desktop-only" aria-label="搜索歌曲">
         <input id="searchInputDesktop" type="search" placeholder="搜索歌曲或编号" aria-label="搜索歌曲或编号" />
-      </div>
-
-      <!-- Mobile search FAB -->
-      <button id="searchFab" class="search-fab mobile-only" title="搜索">🔍</button>
-      <div id="searchOverlay" class="search-overlay mobile-only" aria-hidden="true">
-        <button id="searchBack" class="icon-btn" title="返回">←</button>
-        <input id="searchInputMobile" type="search" placeholder="搜索歌曲或编号" aria-label="搜索歌曲或编号" />
       </div>
 
       <div id="listCount" class="list-count" aria-hidden="true">--</div>
@@ -164,6 +152,20 @@
         <button class="timer-cancel-btn" id="cancelTimerBtn" style="display:none;">取消定时</button>
       </div>
     </div>
+  </div>
+
+  <!-- Mobile search FAB (moved outside menu-bar to fix backdrop-filter containing block issue) -->
+  <button id="searchFab" class="search-fab" title="搜索">🔍</button>
+  <div id="searchOverlay" class="search-overlay" aria-hidden="true">
+    <button id="searchBack" class="icon-btn" title="返回">←</button>
+    <input id="searchInputMobile" type="search" placeholder="搜索歌曲或编号" aria-label="搜索歌曲或编号" />
+  </div>
+
+  <!-- Mobile filter menu (moved outside menu-bar to fix backdrop-filter containing block issue) -->
+  <div id="filterMenu" class="filter-menu" role="menu" aria-hidden="true">
+    <button role="menuitem" data-filter="all" class="fm-item">全部</button>
+    <button role="menuitem" data-filter="only_chorus" class="fm-item">仅合</button>
+    <button role="menuitem" data-filter="exclude_chorus" class="fm-item">非合</button>
   </div>
 
   <script src="./theme.js"></script>

@@ -106,11 +106,13 @@ header {
   position: fixed;
   top: calc(var(--header-height) + 8px);
   left: 12px;
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
   border-radius: 12px;
   padding: 8px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 30px var(--glass-shadow);
   z-index: 1300;
   display: none;
   flex-direction: column;
@@ -132,18 +134,35 @@ header {
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  color: var(--text-primary);
   transition: all 0.2s;
+  /* Reset color-scheme to prevent inheritance from data-theme attribute */
+  color-scheme: normal;
+}
+
+/* Light theme: theme menu items should have dark text */
+:root[data-theme="light"] .theme-menu .theme-item,
+:root:not([data-theme]) .theme-menu .theme-item {
+  color: #000000 !important;
+}
+
+/* Dark theme: theme menu items should have light text */
+:root[data-theme="dark"] .theme-menu .theme-item,
+:root[data-theme="code-dark"] .theme-menu .theme-item {
+  color: #FFFFFF !important;
+}
+
+/* Active item always has white text */
+.theme-menu .theme-item.active {
+  color: #FFFFFF !important;
 }
 
 .theme-item:hover {
-  background: var(--highlight);
-  color: var(--accent);
+  background: var(--card-hover);
 }
 
 .theme-item.active {
-  background: var(--highlight);
-  color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
   font-weight: 600;
 }
 

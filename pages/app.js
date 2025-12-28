@@ -307,20 +307,47 @@
       });
 
       // search (debounced) - wire desktop and mobile inputs
-      const doSearch = debounce(() => {
-        // prefer desktop input value if present, otherwise mobile
-        const val = (searchInputDesktop && searchInputDesktop.value) ? searchInputDesktop.value : (searchInputMobile && searchInputMobile.value ? searchInputMobile.value : '');
+      const doSearch = debounce((sourceInput) => {
+        // Get value from the source input that triggered the event
+        const val = sourceInput ? sourceInput.value : '';
         searchQuery = val || '';
         localStorage.setItem('praise_searchQuery', searchQuery);
+        // Sync both inputs
+        if (searchInputDesktop && searchInputDesktop !== sourceInput) {
+          searchInputDesktop.value = searchQuery;
+        }
+        if (searchInputMobile && searchInputMobile !== sourceInput) {
+          searchInputMobile.value = searchQuery;
+        }
         applyFiltersAndSearch(); renderList();
       }, 220);
+
+      // Immediate search for clear button (no debounce needed)
+      const doSearchImmediate = (sourceInput) => {
+        const val = sourceInput ? sourceInput.value : '';
+        searchQuery = val || '';
+        localStorage.setItem('praise_searchQuery', searchQuery);
+        // Sync both inputs
+        if (searchInputDesktop && searchInputDesktop !== sourceInput) {
+          searchInputDesktop.value = searchQuery;
+        }
+        if (searchInputMobile && searchInputMobile !== sourceInput) {
+          searchInputMobile.value = searchQuery;
+        }
+        applyFiltersAndSearch(); renderList();
+      };
+
       if (searchInputDesktop) {
         searchInputDesktop.value = searchQuery || '';
-        searchInputDesktop.addEventListener('input', doSearch);
+        searchInputDesktop.addEventListener('input', (e) => doSearch(e.target));
+        // Listen to 'search' event for clear button click
+        searchInputDesktop.addEventListener('search', (e) => doSearchImmediate(e.target));
       }
       if (searchInputMobile) {
         searchInputMobile.value = searchQuery || '';
-        searchInputMobile.addEventListener('input', doSearch);
+        searchInputMobile.addEventListener('input', (e) => doSearch(e.target));
+        // Listen to 'search' event for clear button click
+        searchInputMobile.addEventListener('search', (e) => doSearchImmediate(e.target));
       }
 
       // search FAB behavior for mobile
