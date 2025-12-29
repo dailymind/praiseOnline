@@ -329,64 +329,73 @@ header {
 
 /* Search FAB and Overlay (Mobile) */
 .search-fab {
-  position: fixed;
-  top: calc(var(--header-height) + var(--menu-height) + 16px);
-  right: 16px;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--glass-border);
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: transparent;
+  border: none;
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 1300;
+  z-index: 1500;
   cursor: pointer;
-  box-shadow: 0 8px 24px var(--glass-shadow);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-primary);
+  padding: 8px;
 }
 
 .search-fab:hover {
-  transform: scale(1.05);
+  background: var(--card-hover);
+  transform: translateY(-50%) scale(1.05);
 }
 
 .search-fab:active {
-  transform: scale(0.95);
+  transform: translateY(-50%) scale(0.95);
 }
 
 .search-fab.hidden {
-  display: none;
+  display: none !important;
 }
 
 .search-overlay {
   position: fixed;
-  top: calc(var(--header-height) + var(--menu-height) + 16px);
-  left: 16px;
-  right: 16px;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
   display: none;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
-  border-radius: 24px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  box-shadow: 0 12px 48px var(--glass-shadow);
-  z-index: 1300;
-  border: 1px solid var(--glass-border);
+  padding: 0 12px;
+  background: var(--header-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  z-index: 1600;
+  border-bottom: 1px solid var(--border);
 }
 
 .search-overlay.open {
   display: flex;
-  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .search-overlay input {
   flex: 1;
   padding: 10px 14px;
-  border-radius: 16px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   outline: none;
   font-size: 16px;
@@ -395,8 +404,37 @@ header {
   font-weight: 500;
 }
 
+.search-overlay input:focus {
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+  border-color: var(--accent);
+}
+
 .search-overlay input::placeholder {
   color: var(--text-secondary);
+}
+
+.search-close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-close-btn:hover {
+  background: var(--card-hover);
+  color: var(--text-primary);
+}
+
+.search-close-btn:active {
+  transform: scale(0.95);
 }
 
 /* Audio Player (Hidden) */
