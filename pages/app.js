@@ -698,7 +698,7 @@ const PraiseModule = (function() {
 // ========== 话语模块 ==========
 const WordsModule = (function() {
   let songs = [];
-  const currentDir = "jiamingzh/worship/";
+  const currentDir = "worship/";
 
   async function loadList() {
     const listEl = document.getElementById("wordsList");
