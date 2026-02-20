@@ -54,56 +54,75 @@ class ThemeManager {
   }
 
   /**
+   * Cycle to next theme (for simple toggle buttons)
+   */
+  cycleTheme() {
+    const simpleThemes = ['light', 'dark', 'code-dark'];
+    const currentIndex = simpleThemes.indexOf(this.currentTheme);
+    const nextIndex = (currentIndex + 1) % simpleThemes.length;
+    this.applyTheme(simpleThemes[nextIndex]);
+  }
+
+  /**
    * Setup event listeners for theme switching
    */
   setupEventListeners() {
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     const themeMenu = document.getElementById('themeMenu');
 
-    if (!themeToggleBtn || !themeMenu) {
-      console.warn('Theme toggle button or menu not found in DOM');
-      return;
+    // Setup main theme toggle with menu (if exists)
+    if (themeToggleBtn && themeMenu) {
+      // Toggle menu visibility
+      themeToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        themeMenu.classList.toggle('open');
+        themeMenu.setAttribute('aria-hidden', !themeMenu.classList.contains('open'));
+        themeToggleBtn.setAttribute('aria-expanded', themeMenu.classList.contains('open'));
+      });
+
+      // Theme selection
+      document.querySelectorAll('.theme-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const selectedTheme = btn.dataset.theme;
+          this.applyTheme(selectedTheme);
+
+          // Close menu after selection
+          themeMenu.classList.remove('open');
+          themeMenu.setAttribute('aria-hidden', 'true');
+          themeToggleBtn.setAttribute('aria-expanded', 'false');
+        });
+      });
+
+      // Close menu on outside click
+      document.addEventListener('click', (e) => {
+        if (themeMenu.classList.contains('open') &&
+            !themeMenu.contains(e.target) &&
+            !themeToggleBtn.contains(e.target)) {
+          themeMenu.classList.remove('open');
+          themeMenu.setAttribute('aria-hidden', 'true');
+          themeToggleBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Close menu on Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && themeMenu.classList.contains('open')) {
+          themeMenu.classList.remove('open');
+          themeMenu.setAttribute('aria-hidden', 'true');
+          themeToggleBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
     }
 
-    // Toggle menu visibility
-    themeToggleBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      themeMenu.classList.toggle('open');
-      themeMenu.setAttribute('aria-hidden', !themeMenu.classList.contains('open'));
-      themeToggleBtn.setAttribute('aria-expanded', themeMenu.classList.contains('open'));
-    });
+    // Setup all theme toggle buttons (simple cycle mode)
+    document.querySelectorAll('.theme-toggle-header').forEach(btn => {
+      // Skip the main toggle button if it has a menu
+      if (btn.id === 'themeToggleBtn' && themeMenu) return;
 
-    // Theme selection
-    document.querySelectorAll('.theme-item').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const selectedTheme = btn.dataset.theme;
-        this.applyTheme(selectedTheme);
-        
-        // Close menu after selection
-        themeMenu.classList.remove('open');
-        themeMenu.setAttribute('aria-hidden', 'true');
-        themeToggleBtn.setAttribute('aria-expanded', 'false');
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.cycleTheme();
       });
-    });
-
-    // Close menu on outside click
-    document.addEventListener('click', (e) => {
-      if (themeMenu.classList.contains('open') && 
-          !themeMenu.contains(e.target) && 
-          !themeToggleBtn.contains(e.target)) {
-        themeMenu.classList.remove('open');
-        themeMenu.setAttribute('aria-hidden', 'true');
-        themeToggleBtn.setAttribute('aria-expanded', 'false');
-      }
-    });
-
-    // Close menu on Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && themeMenu.classList.contains('open')) {
-        themeMenu.classList.remove('open');
-        themeMenu.setAttribute('aria-hidden', 'true');
-        themeToggleBtn.setAttribute('aria-expanded', 'false');
-      }
     });
   }
 
