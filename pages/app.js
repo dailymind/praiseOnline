@@ -239,7 +239,13 @@ const PraiseModule = (function() {
 
   // 显示迷你播放器
   function showMiniPlayer() {
-    miniPlayer.style.display = 'block';
+    // 如果 miniPlayer 未初始化，先获取它
+    if (!miniPlayer) {
+      miniPlayer = document.getElementById("miniPlayer");
+    }
+    if (miniPlayer) {
+      miniPlayer.style.display = 'block';
+    }
   }
 
   // 添加到最近播放
@@ -750,6 +756,56 @@ const WordsModule = (function() {
     if (PraiseModule.showMiniPlayer) {
       PraiseModule.showMiniPlayer();
     }
+    // 确保播放器控件事件已绑定
+    initPlayerControls();
+  }
+
+  // 初始化播放器控件（只执行一次）
+  let playerControlsInitialized = false;
+  function initPlayerControls() {
+    if (playerControlsInitialized) return;
+
+    const player = document.getElementById("player");
+    const playPauseBtn = document.getElementById("playPauseBtn");
+    const playIcon = playPauseBtn?.querySelector('.play-icon');
+    const pauseIcon = playPauseBtn?.querySelector('.pause-icon');
+    const progressFill = document.querySelector('.progress-fill');
+
+    if (!player || !playPauseBtn) return;
+
+    // 播放/暂停按钮
+    playPauseBtn.addEventListener('click', () => {
+      if (player.src) {
+        if (player.paused) {
+          player.play();
+        } else {
+          player.pause();
+        }
+      }
+    });
+
+    // 播放状态变化
+    player.addEventListener('play', () => {
+      if (playIcon) playIcon.style.display = 'none';
+      if (pauseIcon) pauseIcon.style.display = 'block';
+    });
+
+    player.addEventListener('pause', () => {
+      if (playIcon) playIcon.style.display = 'block';
+      if (pauseIcon) pauseIcon.style.display = 'none';
+    });
+
+    // 进度更新
+    player.addEventListener('timeupdate', () => {
+      if (!player.duration || !progressFill) return;
+      const percent = (player.currentTime / player.duration) * 100;
+      const circumference = 100.531;
+      const dashoffset = circumference - (percent / 100) * circumference;
+      progressFill.style.strokeDasharray = `${circumference} ${circumference}`;
+      progressFill.style.strokeDashoffset = dashoffset;
+    });
+
+    playerControlsInitialized = true;
   }
 
   async function init() {

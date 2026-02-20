@@ -5,102 +5,194 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="api-base" content="https://papi.242500.xyz" />
   <meta name="theme-color" content="#2563eb" />
-  
-  <!-- Favicon and app icons -->
+
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <link rel="shortcut icon" href="./favicon.svg" />
   <link rel="apple-touch-icon" href="./app-icon.svg" />
-  
-  <title>赞美诗播放器</title>
+
+  <title>赞美在线 - 本地预览</title>
   <link rel="stylesheet" href="./style.css" />
   <link rel="stylesheet" href="./theme.css" />
 </head>
 <body>
-  <header>
-    <!-- Theme toggle button moved to top-left of header -->
-    <button id="themeToggleBtn" class="icon-btn theme-toggle-header" title="切换主题" aria-label="主题切换" aria-expanded="false">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
-        <path d="M12 3v1m0 16v1m9-9h-1m-16 0H1m15.364 1.636l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-      </svg>
-    </button>
-
-    <span class="header-title">赞美诗播放器</span>
-
-    <!-- Mobile search button in header -->
-    <button id="searchFab" class="search-fab mobile-only" title="搜索">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
-        <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-      </svg>
-    </button>
-
-    <!-- Theme selector menu -->
-    <div id="themeMenu" class="theme-menu" aria-hidden="true">
-      <button class="theme-item" data-theme="light" title="亮色主题">
-        <span class="theme-preview light"></span> 亮色
+  <!-- ========== 首页 ========== -->
+  <div data-page="home" class="home-page">
+    <header>
+      <button id="themeToggleBtnHome" class="icon-btn theme-toggle-header" title="切换主题" aria-label="主题切换">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+          <path d="M12 3v1m0 16v1m9-9h-1m-16 0H1m15.364 1.636l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
       </button>
-      <button class="theme-item" data-theme="dark" title="深色主题">
-        <span class="theme-preview dark"></span> 深色
-      </button>
-      <button class="theme-item" data-theme="code-dark" title="VS Code 深色主题">
-        <span class="theme-preview code-dark"></span> Code Dark
-      </button>
-    </div>
-  </header>
+      <span class="header-title">赞美在线</span>
+    </header>
 
-  <div class="menu-bar">
-    <div class="menu">
-      <button class="menu-btn active" data-dir="praise/附录/">附录</button>
-      <button class="menu-btn" data-dir="praise/大本/">大本</button>
-      <button class="menu-btn" data-dir="praise/新编/">新编</button>
-      <button class="menu-btn" data-dir="praise/少儿/">少儿</button>
-      <button class="menu-btn" data-dir="praise/集中/">集中</button>
-    </div>
+    <main class="home-grid">
+      <div class="module-card" data-module="praise">
+        <div class="card-icon">🎵</div>
+        <h2 class="card-title">赞美</h2>
+        <p class="card-desc">赞美诗播放</p>
+      </div>
+      <div class="module-card" data-module="words">
+        <div class="card-icon">📜</div>
+        <h2 class="card-title">话语</h2>
+        <p class="card-desc">每日话语分享</p>
+      </div>
+      <div class="module-card" data-module="bible">
+        <div class="card-icon">✝️</div>
+        <h2 class="card-title">圣经</h2>
+        <p class="card-desc">圣经阅读器</p>
+      </div>
+      <div class="module-card" data-module="resources">
+        <div class="card-icon">📁</div>
+        <h2 class="card-title">资料</h2>
+        <p class="card-desc">学习资料</p>
+      </div>
+    </main>
+  </div>
 
-    <div class="top-controls">
-      <!-- Desktop segmented filter (visible on larger screens) -->
-      <div id="filterControl" class="segmented desktop-only" aria-label="过滤">
-        <button data-filter="all" class="active" title="全部">全部</button>
-        <button data-filter="only_chorus" title="仅合唱">仅合</button>
-        <button data-filter="exclude_chorus" title="非合">非合</button>
+  <!-- ========== 赞美模块页面 ========== -->
+  <div data-page="praise" style="display:none;">
+    <header>
+      <button id="backToHomeBtn" class="icon-btn back-home-btn" title="返回首页">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+      </button>
+      <button id="themeToggleBtn" class="icon-btn theme-toggle-header" title="切换主题" aria-label="主题切换" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+          <path d="M12 3v1m0 16v1m9-9h-1m-16 0H1m15.364 1.636l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+      </button>
+      <span class="header-title">赞美诗播放器</span>
+      <button id="searchFab" class="search-fab mobile-only" title="搜索">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+          <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+      </button>
+      <div id="themeMenu" class="theme-menu" aria-hidden="true">
+        <button class="theme-item" data-theme="light" title="亮色主题">
+          <span class="theme-preview light"></span> 亮色
+        </button>
+        <button class="theme-item" data-theme="dark" title="深色主题">
+          <span class="theme-preview dark"></span> 深色
+        </button>
+        <button class="theme-item" data-theme="code-dark" title="VS Code 深色主题">
+          <span class="theme-preview code-dark"></span> Code Dark
+        </button>
+      </div>
+    </header>
+
+    <div class="menu-bar">
+      <div class="menu">
+        <button class="menu-btn active" data-dir="praise/附录/">附录</button>
+        <button class="menu-btn" data-dir="praise/大本/">大本</button>
+        <button class="menu-btn" data-dir="praise/新编/">新编</button>
+        <button class="menu-btn" data-dir="praise/少儿/">少儿</button>
+        <button class="menu-btn" data-dir="praise/集中/">集中</button>
       </div>
 
-      <!-- Mobile filter button (funnel icon) -->
-      <button id="filterMenuBtn" class="icon-btn mobile-only" aria-haspopup="true" aria-expanded="false" title="筛选">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M3 5h18v2l-7 8v4l-4-2v-2L3 7V5z"/></svg>
-      </button>
-
-      <button id="sortToggleBtn" class="icon-btn" title="切换排序（正序/倒序）" aria-pressed="false">⇅</button>
-
-      <!-- Desktop search input -->
-      <div id="searchWrap" class="compact-search desktop-only" aria-label="搜索歌曲">
-        <input id="searchInputDesktop" type="search" placeholder="搜索歌曲或编号" aria-label="搜索歌曲或编号" />
+      <div class="top-controls">
+        <div id="filterControl" class="segmented desktop-only" aria-label="过滤">
+          <button data-filter="all" class="active" title="全部">全部</button>
+          <button data-filter="only_chorus" title="仅合唱">仅合</button>
+          <button data-filter="exclude_chorus" title="非合">非合</button>
+        </div>
+        <button id="filterMenuBtn" class="icon-btn mobile-only" aria-haspopup="true" aria-expanded="false" title="筛选">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M3 5h18v2l-7 8v4l-4-2v-2L3 7V5z"/></svg>
+        </button>
+        <button id="sortToggleBtn" class="icon-btn" title="切换排序（正序/倒序）" aria-pressed="false">⇅</button>
+        <div id="searchWrap" class="compact-search desktop-only" aria-label="搜索歌曲">
+          <input id="searchInputDesktop" type="search" placeholder="搜索歌曲或编号" aria-label="搜索歌曲或编号" />
+        </div>
+        <div id="listCount" class="list-count" aria-hidden="true">--</div>
       </div>
+    </div>
 
-      <div id="listCount" class="list-count" aria-hidden="true">--</div>
+    <div class="container">
+      <audio id="player" preload="metadata"></audio>
+      <ul id="songList" class="song-list"></ul>
     </div>
   </div>
 
-  <div class="container">
-    <audio id="player" preload="metadata"></audio>
-    <ul id="songList" class="song-list"></ul>
+  <!-- ========== 话语模块页面 ========== -->
+  <div data-page="words" style="display:none;">
+    <header>
+      <button id="backToHomeBtn" class="icon-btn back-home-btn" title="返回首页">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+      </button>
+      <span class="header-title">话语</span>
+      <button class="icon-btn theme-toggle-header" title="切换主题">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M12 3v1m0 16v1m9-9h-1m-16 0H1m15.364 1.636l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+      </button>
+    </header>
+    <div class="container">
+      <ul id="wordsList" class="song-list"></ul>
+    </div>
   </div>
 
-  <!-- 底部悬浮播放栏 -->
+  <!-- ========== 圣经模块页面 ========== -->
+  <div data-page="bible" style="display:none;">
+    <header>
+      <button id="backToHomeBtn" class="icon-btn back-home-btn" title="返回首页">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+      </button>
+      <span class="header-title">圣经</span>
+      <button class="icon-btn theme-toggle-header" title="切换主题">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M12 3v1m0 16v1m9-9h-1m-16 0H1m15.364 1.636l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+      </button>
+    </header>
+    <div id="bibleBooksView" class="container"></div>
+    <div id="bibleChaptersView" class="container" style="display:none;"></div>
+    <div id="bibleContentView" class="container bible-content" style="display:none;"></div>
+  </div>
+
+  <!-- ========== 资料模块页面 ========== -->
+  <div data-page="resources" style="display:none;">
+    <header>
+      <button id="backToHomeBtn" class="icon-btn back-home-btn" title="返回首页">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+      </button>
+      <span class="header-title">资料</span>
+      <button class="icon-btn theme-toggle-header" title="切换主题">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M12 3v1m0 16v1m9-9h-1m-16 0H1m15.364 1.636l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+      </button>
+    </header>
+    <div class="menu-bar">
+      <div class="menu">
+        <button class="menu-btn active" data-type="all">全部</button>
+        <button class="menu-btn" data-type="pdf">PDF</button>
+        <button class="menu-btn" data-type="audio">音频</button>
+        <button class="menu-btn" data-type="video">视频</button>
+      </div>
+    </div>
+    <div class="container">
+      <ul id="resourcesList" class="song-list"></ul>
+    </div>
+  </div>
+
+  <!-- ========== 底部悬浮播放栏 ========== -->
   <div class="mini-player" id="miniPlayer" style="display:none;">
     <div class="mini-player-content">
-      <!-- 1. 最左边：播放模式 -->
       <button class="control-btn play-mode-btn" id="playModeBtn" title="播放模式">
         <svg class="mode-icon" viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;">
           <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
         </svg>
       </button>
-
-      <!-- 2. 中间：歌曲信息（滚动） -->
       <div class="song-info-scroll">
         <div class="song-info-content" id="songInfoContent">未播放</div>
       </div>
-
-      <!-- 3. 播放按钮和进度 -->
       <div class="play-control-wrapper">
         <button class="play-pause-btn" id="playPauseBtn" title="播放/暂停">
           <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -117,23 +209,17 @@
           </svg>
         </div>
       </div>
-
-      <!-- 4. 最近播放列表按钮 -->
       <button class="control-btn recent-list-btn" id="recentListBtn" title="最近播放">
         <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;">
           <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
         </svg>
       </button>
-
-      <!-- 5. 定时播放按钮 -->
       <button class="control-btn timer-btn" id="timerBtn" title="定时关闭">
         <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
         </svg>
       </button>
     </div>
-
-    <!-- 最近播放列表弹窗 -->
     <div class="recent-list-panel" id="recentListPanel">
       <div class="recent-list-header">
         <h3>最近播放</h3>
@@ -141,8 +227,6 @@
       </div>
       <ul class="recent-list" id="recentListItems"></ul>
     </div>
-
-    <!-- 定时设置弹窗 -->
     <div class="timer-panel" id="timerPanel">
       <div class="timer-header">
         <h3>定时关闭</h3>
@@ -171,7 +255,7 @@
     </button>
   </div>
 
-  <!-- Mobile filter menu (moved outside menu-bar to fix backdrop-filter containing block issue) -->
+  <!-- Mobile filter menu -->
   <div id="filterMenu" class="filter-menu" role="menu" aria-hidden="true">
     <button role="menuitem" data-filter="all" class="fm-item">全部</button>
     <button role="menuitem" data-filter="only_chorus" class="fm-item">仅合</button>
