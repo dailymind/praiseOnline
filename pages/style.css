@@ -972,3 +972,244 @@ textarea,
 * {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* ========== 首页样式 ========== */
+.home-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 0 20px;
+  flex: 1;
+}
+
+@media (min-width: 768px) {
+  .home-grid {
+    gap: 30px;
+    max-width: 700px;
+    margin-top: 60px;
+  }
+}
+
+.module-card {
+  background: var(--card-bg, rgba(255,255,255,0.8));
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 30px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px var(--glass-shadow);
+}
+
+.module-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px var(--glass-shadow);
+}
+
+.module-card:active {
+  transform: scale(0.97);
+}
+
+.card-icon {
+  font-size: 52px;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+}
+
+.card-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* 返回首页按钮 */
+.back-home-btn {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1500;
+  background: transparent;
+  padding: 8px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-primary);
+}
+
+.back-home-btn:hover {
+  background: var(--card-hover);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.back-home-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* 调整有返回按钮时的主题按钮位置 */
+[data-page="praise"] .theme-toggle-header,
+[data-page="words"] .theme-toggle-header,
+[data-page="bible"] .theme-toggle-header,
+[data-page="resources"] .theme-toggle-header {
+  left: auto;
+  right: auto;
+  position: relative;
+  transform: none;
+  margin-left: auto;
+}
+
+/* ========== 圣经模块样式 ========== */
+.bible-group-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 24px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bible-books-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (min-width: 768px) {
+  .bible-books-list {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+}
+
+.bible-book-btn {
+  padding: 12px 8px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bible-book-btn:hover {
+  background: var(--card-hover);
+  transform: scale(1.02);
+}
+
+.bible-book-btn:active {
+  transform: scale(0.98);
+}
+
+.chapters-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+  .chapters-grid {
+    grid-template-columns: repeat(8, 1fr);
+    gap: 12px;
+  }
+}
+
+.chapter-btn {
+  padding: 12px 8px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chapter-btn:hover {
+  background: var(--card-hover);
+  transform: scale(1.02);
+}
+
+.chapter-btn:active {
+  transform: scale(0.98);
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 20px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 20px;
+}
+
+.back-btn:hover {
+  background: var(--card-hover);
+}
+
+/* 圣经内容样式 */
+.bible-content {
+  line-height: 1.9;
+  font-size: 16px;
+}
+
+.bible-content-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.bible-chapter-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--accent);
+  color: var(--text-primary);
+}
+
+.bible-verses p {
+  margin: 0 0 12px;
+  text-align: justify;
+}
+
+.bible-verse-num {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-right: 6px;
+  vertical-align: super;
+}
