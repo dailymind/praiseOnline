@@ -20,9 +20,20 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* 页面容器：每个模块页面占满视口，作为 flex 列布局，
+   让内部的 .container 能够按 flex:1 + overflow-y:auto 滚动 */
+[data-page] {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* Glass Utility Classes */
@@ -446,6 +457,7 @@ header {
 /* Container */
 .container {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
@@ -982,19 +994,27 @@ textarea,
 
 .home-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* 固定 2 列，列宽 160~250px，居中、垂直居中，不再被拉伸成细长条 */
+  grid-template-columns: repeat(2, minmax(160px, 250px));
+  justify-content: center;
+  align-content: center;
   gap: 20px;
-  max-width: 600px;
-  margin: 40px auto;
-  padding: 0 20px;
   flex: 1;
+  padding: 24px 20px;
 }
 
 @media (min-width: 768px) {
   .home-grid {
-    gap: 30px;
-    max-width: 700px;
-    margin-top: 60px;
+    gap: 28px;
+  }
+}
+
+/* 超窄屏（<360px）：缩小间距，避免两列溢出 */
+@media (max-width: 359px) {
+  .home-grid {
+    grid-template-columns: repeat(2, minmax(110px, 1fr));
+    gap: 12px;
+    padding: 16px 12px;
   }
 }
 
@@ -1003,8 +1023,13 @@ textarea,
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 30px 20px;
+  border-radius: 24px;
+  padding: 32px 20px;
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   cursor: pointer;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1020,16 +1045,24 @@ textarea,
   transform: scale(0.97);
 }
 
+/* 图标：放入圆角底托，视觉更精致 */
 .card-icon {
-  font-size: 52px;
-  margin-bottom: 16px;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: var(--card-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
   line-height: 1;
+  margin-bottom: 14px;
 }
 
 .card-title {
   font-size: 20px;
   font-weight: 700;
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
   color: var(--text-primary);
 }
 
@@ -1038,6 +1071,11 @@ textarea,
   color: var(--text-secondary);
   margin: 0;
   font-weight: 500;
+}
+
+/* 首页标题为左侧主题按钮预留空间 */
+.home-page .header-title {
+  padding: 0 56px;
 }
 
 /* 返回首页按钮 */
@@ -1065,16 +1103,42 @@ textarea,
   transform: translateY(-50%) scale(0.95);
 }
 
-/* 调整有返回按钮时的主题按钮位置 */
+/* 调整有返回按钮时的主题按钮位置（移到右侧，垂直居中） */
 [data-page="praise"] .theme-toggle-header,
 [data-page="words"] .theme-toggle-header,
 [data-page="bible"] .theme-toggle-header,
 [data-page="resources"] .theme-toggle-header {
   left: auto;
-  right: auto;
-  position: relative;
-  transform: none;
-  margin-left: auto;
+  right: 12px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* 子页面标题为左右两侧按钮预留空间，避免文字被遮挡 */
+[data-page="praise"] .header-title,
+[data-page="words"] .header-title,
+[data-page="bible"] .header-title,
+[data-page="resources"] .header-title {
+  padding: 0 60px;
+}
+
+/* 移动端：主题按钮移到搜索按钮左侧，标题预留更多空间
+   （放在基础规则之后，确保覆盖生效） */
+@media (max-width: 768px) {
+  [data-page="praise"] .theme-toggle-header,
+  [data-page="words"] .theme-toggle-header,
+  [data-page="bible"] .theme-toggle-header,
+  [data-page="resources"] .theme-toggle-header {
+    right: 56px;
+  }
+
+  [data-page="praise"] .header-title,
+  [data-page="words"] .header-title,
+  [data-page="bible"] .header-title,
+  [data-page="resources"] .header-title {
+    padding: 0 104px;
+  }
 }
 
 /* ========== 圣经模块样式 ========== */

@@ -127,3 +127,21 @@ On page load, if `player.src` is set (from browser history), the app:
 - Defensive checks: `if (!foo) return;` pattern
 - HTML escaping via `escapeHtml()` utility to prevent XSS
 - Mobile-first responsive: `.mobile-only` / `.desktop-only` classes for conditional rendering
+
+
+## Note:
+
+After each task is completed, you need to remind me whether to commit via Git. There are three options:
+
+1. Commit but do not push
+
+2. Commit and push
+
+3. Do not commit this time.
+
+
+## Note 2:
+
+If the changes and additions made to the local system are not reflected in the requirements document, the requirements document, test code, and test case report need to be updated.
+
+      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.
