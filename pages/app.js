@@ -41,22 +41,16 @@ const Router = {
       el.style.display = 'none';
     });
 
-    // 显示当前页面
+    // 显示当前页面（flex 以便页面内部使用 flex 布局滚动列表）
     const pageEl = document.querySelector(`[data-page="${route}"]`);
     if (pageEl) {
-      pageEl.style.display = 'block';
+      pageEl.style.display = 'flex';
     }
 
     // 更新返回首页按钮显示状态
     document.querySelectorAll('#backToHomeBtn').forEach(btn => {
       btn.style.display = route === 'home' ? 'none' : 'flex';
     });
-
-    // 更新搜索按钮显示状态（只在赞美页面显示）
-    const searchFab = document.getElementById('searchFab');
-    if (searchFab) {
-      searchFab.style.display = route === 'praise' ? 'flex' : 'none';
-    }
 
     // 调用对应模块的初始化
     if (route === 'home' && HomePage.init) HomePage.init();
@@ -482,9 +476,9 @@ const PraiseModule = (function() {
         e.preventDefault();
         if (searchInputDesktop) searchInputDesktop.focus();
         else if (searchFab && searchOverlay && searchInputMobile) {
-          searchOverlay.style.display = 'flex';
+          searchOverlay.classList.add('open');
           searchOverlay.setAttribute('aria-hidden', 'false');
-          searchFab.style.display = 'none';
+          searchFab.classList.add('hidden');
           setTimeout(() => searchInputMobile.focus(), 50);
         }
       }

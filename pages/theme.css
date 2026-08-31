@@ -63,49 +63,14 @@
   color-scheme: dark;
 }
 
-/* Header positioning for theme button - LEFT SIDE */
-header {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--accent);
-  color: #ffffff;
-}
+/* Header 的尺寸、背景等样式统一由 style.css 管理，这里只保留主题菜单相关样式 */
 
-.header-title {
-  font-size: 18px;
-  font-weight: 600;
-  flex: 1;
-  text-align: center;
-}
-
-.theme-toggle-header {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #ffffff;
-  font-size: 18px;
-  z-index: 1500;
-  background: transparent;
-  padding: 6px 8px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.theme-toggle-header:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-}
-
-/* Theme Menu positioning - appears below left button */
+/* Theme Menu positioning - appears below the theme button (right side) */
 .theme-menu {
   position: fixed;
   top: calc(var(--header-height) + 8px);
-  left: 12px;
+  right: 12px;
+  left: auto;
   background: var(--glass-bg);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -190,10 +155,7 @@ header {
 
 @media (max-width: 768px) {
   .theme-menu {
-    left: 8px;
-  }
-
-  .theme-toggle-header {
-    left: 8px;
+    right: 56px;
+    left: auto;
   }
 }

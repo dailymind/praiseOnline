@@ -20,9 +20,20 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* 页面容器：每个模块页面占满视口，作为 flex 列布局，
+   让内部的 .container 能够按 flex:1 + overflow-y:auto 滚动 */
+[data-page] {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* Glass Utility Classes */
@@ -446,6 +457,7 @@ header {
 /* Container */
 .container {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
@@ -1040,6 +1052,11 @@ textarea,
   font-weight: 500;
 }
 
+/* 首页标题为左侧主题按钮预留空间 */
+.home-page .header-title {
+  padding: 0 56px;
+}
+
 /* 返回首页按钮 */
 .back-home-btn {
   position: absolute;
@@ -1065,16 +1082,42 @@ textarea,
   transform: translateY(-50%) scale(0.95);
 }
 
-/* 调整有返回按钮时的主题按钮位置 */
+/* 调整有返回按钮时的主题按钮位置（移到右侧，垂直居中） */
 [data-page="praise"] .theme-toggle-header,
 [data-page="words"] .theme-toggle-header,
 [data-page="bible"] .theme-toggle-header,
 [data-page="resources"] .theme-toggle-header {
   left: auto;
-  right: auto;
-  position: relative;
-  transform: none;
-  margin-left: auto;
+  right: 12px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* 子页面标题为左右两侧按钮预留空间，避免文字被遮挡 */
+[data-page="praise"] .header-title,
+[data-page="words"] .header-title,
+[data-page="bible"] .header-title,
+[data-page="resources"] .header-title {
+  padding: 0 60px;
+}
+
+/* 移动端：主题按钮移到搜索按钮左侧，标题预留更多空间
+   （放在基础规则之后，确保覆盖生效） */
+@media (max-width: 768px) {
+  [data-page="praise"] .theme-toggle-header,
+  [data-page="words"] .theme-toggle-header,
+  [data-page="bible"] .theme-toggle-header,
+  [data-page="resources"] .theme-toggle-header {
+    right: 56px;
+  }
+
+  [data-page="praise"] .header-title,
+  [data-page="words"] .header-title,
+  [data-page="bible"] .header-title,
+  [data-page="resources"] .header-title {
+    padding: 0 104px;
+  }
 }
 
 /* ========== 圣经模块样式 ========== */
