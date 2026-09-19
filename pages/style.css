@@ -1252,6 +1252,29 @@ textarea,
   background: var(--card-hover);
 }
 
+.back-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.back-btn:disabled:hover {
+  background: var(--card-bg);
+}
+
+/* 上一章 / 下一章 导航 */
+.chapter-nav {
+  display: flex;
+  gap: 12px;
+  max-width: 800px;
+  margin: 24px auto 0;
+}
+
+.chapter-nav .back-btn {
+  flex: 1;
+  justify-content: center;
+  margin-top: 0;
+}
+
 /* 圣经内容样式 */
 .bible-content {
   line-height: 1.9;

@@ -942,6 +942,7 @@ const BibleModule = (function() {
   async function loadChapter(book, chapter) {
     if (!contentView) return;
     setView('content');
+    contentView.scrollTop = 0;
     contentView.innerHTML = `<div class="bible-content-wrapper">
         <h2 class="bible-chapter-title">${escapeHtml(book.name)} 第${chapter}章</h2>
         <p class="bible-hint">加载中…</p>
@@ -987,6 +988,7 @@ const BibleModule = (function() {
         ${body}
       </div>`;
 
+    appendChapterNav(book, chapter);
     appendBackToChapters(book);
   }
 
@@ -997,6 +999,48 @@ const BibleModule = (function() {
     backBtn.textContent = '← 返回章节';
     backBtn.onclick = () => renderChapters(book);
     contentView.appendChild(backBtn);
+  }
+
+  // 全书顺序中的上一章/下一章，跨卷自动衔接（创世记50章 -> 诗篇1章）
+  function neighborChapter(bookId, chapter, delta) {
+    const idx = allBooks.findIndex(b => b.id === bookId);
+    if (idx < 0) return null;
+
+    const book = allBooks[idx];
+    const target = chapter + delta;
+    if (target >= 1 && target <= (Number(book.chapters) || 0)) {
+      return { book, chapter: target };
+    }
+
+    const nextIdx = idx + delta;
+    if (nextIdx < 0 || nextIdx >= allBooks.length) return null;
+
+    const nextBook = allBooks[nextIdx];
+    return { book: nextBook, chapter: delta > 0 ? 1 : (Number(nextBook.chapters) || 1) };
+  }
+
+  function appendChapterNav(book, chapter) {
+    if (!contentView) return;
+
+    const nav = document.createElement('div');
+    nav.className = 'chapter-nav';
+
+    [['prev', -1, '← 上一章'], ['next', 1, '下一章 →']].forEach(([kind, delta, label]) => {
+      const target = neighborChapter(book.id, chapter, delta);
+      const btn = document.createElement('button');
+      btn.className = `back-btn chapter-nav-${kind}`;
+      btn.textContent = label;
+
+      if (target) {
+        btn.title = `${target.book.name} 第${target.chapter}章`;
+        btn.onclick = () => loadChapter(target.book, target.chapter);
+      } else {
+        btn.disabled = true;
+      }
+      nav.appendChild(btn);
+    });
+
+    contentView.appendChild(nav);
   }
 
   async function init() {
