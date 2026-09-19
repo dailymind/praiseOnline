@@ -62,11 +62,21 @@ Add this placeholder to `pages/index.html`:
 
 ```html
 <meta name="api-base" content="__API_BASE__" />
+<meta name="file-base" content="__FILE_BASE__" />
 ```
 
-The deployment workflow can replace `__API_BASE__` with the secret `API_BASE` so the client uses your configured API domain.
+The deployment workflow can replace `__API_BASE__` with the secret `API_BASE` so the client uses your configured API domain. If not injected, the client falls back to `https://papi.yourdomain.com`.
 
-If not injected, the client falls back to `https://papi.yourdomain.com`.
+Media files (MP3/PDF) no longer go through the Worker's `/api/file/<encoded-key>`; they are played directly from the public R2 domain:
+
+- `file-base` — public R2 domain holding the media files, replaced from the `FILE_DOMAIN` secret (e.g. `https://r2files.242500.xyz`). If it is empty or not injected, the client falls back to `https://r2files.242500.xyz`.
+- Playback URLs are built as `{file-base}/{R2 key}` with per-segment encoding: `/` is kept as a separator, every other character is `encodeURIComponent`-escaped. For example the R2 key `praise/附录/001.将这山地赐给我.mp3` becomes:
+
+```
+https://r2files.242500.xyz/praise/%E9%99%84%E5%BD%95/001.%E5%B0%86%E8%BF%99%E5%B1%B1%E5%9C%B0%E8%B5%90%E7%BB%99%E6%88%91.mp3
+```
+
+The Worker's `/api/file/<encoded-key>` endpoint is kept for legacy links and for restoring playback state after a reload.
 
 ### GitHub / Cloudflare configuration
 
@@ -75,6 +85,7 @@ Set these repository Secrets in GitHub (Settings → Secrets and variables → A
 - `CLOUDFLARE_API_TOKEN` — Cloudflare API token with necessary permissions for Workers/Pages/R2.
 - `CLOUDFLARE_PAGES_PROJECT_NAME` — (optional) Pages project name to enable Pages deployment in CI.
 - `API_BASE` — (optional) API base URL used by the frontend, e.g. `https://papi.yourdomain.com`.
+- `FILE_DOMAIN` — (optional) public R2 domain serving the media files, e.g. `https://r2files.242500.xyz`; replaces `__FILE_BASE__` in `pages/index.html`. When empty the client falls back to its built-in default.
 - `BUCKET_NAME` — R2 bucket name; workflow replaces `__BUCKET_NAME__` in `worker/wrangler.toml`.
 - `PREVIEW_BUCKET_NAME` — preview bucket name; replaces `__PREVIEW_BUCKET_NAME__`.
 - `API_DOMAIN` — your API domain, e.g. `papi.yourdomain.com`; replaces `__API_DOMAIN__`.
@@ -120,11 +131,11 @@ npx wrangler pages deploy pages --project-name=praise-web
 
 ## Notes
 
-- Organize your MP3 files in R2 like:
-  - `praise/附录/`
-  - `praise/大本/`
-  - `praise/新编/`
+- Organize your files in R2 like:
+  - Hymns: `praise/附录/`, `praise/大本/`, `praise/新编/`
+  - Materials: audio under `resources/audio/`, video under `resources/video/`, PDFs under `resources/pdf/`
 - The Worker `list` API defaults to 1000 items; edit `worker/index.js` to change.
+- `GET /api/list?dir=<dir>&ext=<extensions>`: `ext` is a comma separated list (e.g. `mp3,mp4,pdf`); when omitted only mp3 is returned. The response keeps `songs` (file names) and adds `keys` (full R2 keys including sub-directories) which the frontend uses to build playback URLs.
 - After changing Worker code, redeploy with: `cd worker && npx wrangler deploy`.
 - Use GitHub Secrets (for example `CLOUDFLARE_API_TOKEN`) to keep tokens safe when automating deployments.
 

@@ -25,6 +25,9 @@ jobs:
           
           # 替换 pages/index.html 中的 API_BASE
           sed -i "s|__API_BASE__|${{ secrets.API_DOMAIN }}|g" pages/index.html
+
+          # 替换 pages/index.html 中的 FILE_BASE（R2 公开域名，留空则前端回退默认值）
+          sed -i "s|__FILE_BASE__|${{ secrets.FILE_DOMAIN }}|g" pages/index.html
       
       # 安装最新版本的 wrangler
       - name: Setup Node.js and Wrangler

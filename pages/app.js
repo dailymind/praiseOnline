@@ -8,6 +8,82 @@ const API_BASE = (function() {
   return base;
 })();
 
+// 公开文件域名（R2 自定义域）：音频等媒体直接从这里播放，不再走 Worker 的 /api/file/
+const FILE_BASE = (function() {
+  const metaFile = document.querySelector('meta[name="file-base"]');
+  let base = (metaFile && metaFile.content ? metaFile.content : '').trim();
+  // 未配置（空值或仍是 CI 占位符）时回退到默认公开域名
+  if (!base || /^__.*__$/.test(base)) {
+    base = 'https://r2files.242500.xyz';
+  }
+  if (!/^https?:\/\//i.test(base)) {
+    base = 'https://' + base;
+  }
+  return base.replace(/\/+$/, '');
+})();
+
+// 把 R2 key 转换成公开域名下的直链：保留目录分隔符 "/"，其余字符按段编码
+function buildFileUrl(key) {
+  const encoded = String(key || '')
+    .split('/')
+    .map(seg => encodeURIComponent(seg))
+    .join('/');
+  return `${FILE_BASE}/${encoded}`;
+}
+
+// ========== 播放器控件（全局共享，只绑定一次） ==========
+// 赞美/话语/资料三个模块共用底部迷你播放器，重复绑定会让播放/暂停互相抵消，这里统一收口。
+const PlayerControls = (function() {
+  let initialized = false;
+
+  function init() {
+    if (initialized) return;
+
+    const player = document.getElementById("player");
+    const playPauseBtn = document.getElementById("playPauseBtn");
+    if (!player || !playPauseBtn) return;
+
+    const playIcon = playPauseBtn.querySelector('.play-icon');
+    const pauseIcon = playPauseBtn.querySelector('.pause-icon');
+    const progressFill = document.querySelector('.progress-fill');
+
+    // 播放/暂停：以播放器真实状态为准
+    playPauseBtn.addEventListener('click', () => {
+      if (!player.src) return;
+      if (player.paused) {
+        player.play().catch(()=>{});
+      } else {
+        player.pause();
+      }
+    });
+
+    player.addEventListener('play', () => {
+      playPauseBtn.classList.add('playing');
+      if (playIcon) playIcon.style.display = 'none';
+      if (pauseIcon) pauseIcon.style.display = 'block';
+    });
+
+    player.addEventListener('pause', () => {
+      playPauseBtn.classList.remove('playing');
+      if (playIcon) playIcon.style.display = 'block';
+      if (pauseIcon) pauseIcon.style.display = 'none';
+    });
+
+    // 进度环
+    player.addEventListener('timeupdate', () => {
+      if (!player.duration || !progressFill) return;
+      const percent = (player.currentTime / player.duration) * 100;
+      const circumference = 100.531;
+      progressFill.style.strokeDasharray = `${circumference} ${circumference}`;
+      progressFill.style.strokeDashoffset = circumference - (percent / 100) * circumference;
+    });
+
+    initialized = true;
+  }
+
+  return { init, isInitialized: () => initialized };
+})();
+
 // HTML 转义工具
 function escapeHtml(str) {
   if (!str) return '';
@@ -206,7 +282,7 @@ const PraiseModule = (function() {
   function playByIndex(idx) {
     if (idx < 0 || idx >= songs.length) return;
     const s = songs[idx];
-    const url = `${API_BASE}/api/file/${encodeURIComponent(s.key)}`;
+    const url = buildFileUrl(s.key);
     player.src = url;
     player.play().catch(()=>{});
     currentKey = s.key;
@@ -548,18 +624,8 @@ const PraiseModule = (function() {
     // 检查必需元素
     if (!player || !listEl) return;
 
-    // 播放/暂停
-    if (playPauseBtn) {
-      playPauseBtn.addEventListener('click', () => {
-        if (currentKey && player.src) {
-          if (isPlaying) {
-            player.pause();
-          } else {
-            player.play();
-          }
-        }
-      });
-    }
+    // 播放/暂停控件由全局 PlayerControls 统一绑定，避免与其他模块重复绑定
+    PlayerControls.init();
 
     // 播放模式
     if (playModeBtn) {
@@ -609,22 +675,10 @@ const PraiseModule = (function() {
       }
     }
 
-    // 播放器事件
-    player.addEventListener('play', () => {
-      isPlaying = true;
-      if (playPauseBtn) playPauseBtn.classList.add('playing');
-      if (playIcon) playIcon.style.display = 'none';
-      if (pauseIcon) pauseIcon.style.display = 'block';
-    });
+    // 播放器事件：图标与进度环由 PlayerControls 负责，这里只维护播放状态
+    player.addEventListener('play', () => { isPlaying = true; });
 
-    player.addEventListener('pause', () => {
-      isPlaying = false;
-      if (playPauseBtn) playPauseBtn.classList.remove('playing');
-      if (playIcon) playIcon.style.display = 'block';
-      if (pauseIcon) pauseIcon.style.display = 'none';
-    });
-
-    player.addEventListener('timeupdate', updateProgress);
+    player.addEventListener('pause', () => { isPlaying = false; });
 
     player.addEventListener('ended', () => {
       let nextIndex = -1;
@@ -661,9 +715,16 @@ const PraiseModule = (function() {
     try {
       const src = player.src;
       if (src) {
-        const parts = src.split('/api/file/');
-        if (parts.length === 2) {
-          const decoded = decodeURIComponent(parts[1]);
+        let decoded = null;
+        if (src.indexOf(FILE_BASE + '/') === 0) {
+          // 新格式：公开域名直链
+          decoded = decodeURIComponent(src.slice(FILE_BASE.length + 1));
+        } else {
+          // 旧格式：Worker /api/file/<encoded-key>
+          const parts = src.split('/api/file/');
+          if (parts.length === 2) decoded = decodeURIComponent(parts[1]);
+        }
+        if (decoded) {
           currentKey = decoded;
           const idx = songs.findIndex(s => s.key === currentKey);
           if (idx >= 0) {
@@ -739,7 +800,7 @@ const WordsModule = (function() {
   async function playWord(s) {
     const player = document.getElementById("player");
     const songInfoContent = document.getElementById("songInfoContent");
-    const url = `${API_BASE}/api/file/${encodeURIComponent(s.key)}`;
+    const url = buildFileUrl(s.key);
     player.src = url;
     player.play().catch(()=>{});
 
@@ -754,52 +815,9 @@ const WordsModule = (function() {
     initPlayerControls();
   }
 
-  // 初始化播放器控件（只执行一次）
-  let playerControlsInitialized = false;
+  // 初始化播放器控件（统一走全局 PlayerControls，只绑定一次）
   function initPlayerControls() {
-    if (playerControlsInitialized) return;
-
-    const player = document.getElementById("player");
-    const playPauseBtn = document.getElementById("playPauseBtn");
-    const playIcon = playPauseBtn?.querySelector('.play-icon');
-    const pauseIcon = playPauseBtn?.querySelector('.pause-icon');
-    const progressFill = document.querySelector('.progress-fill');
-
-    if (!player || !playPauseBtn) return;
-
-    // 播放/暂停按钮
-    playPauseBtn.addEventListener('click', () => {
-      if (player.src) {
-        if (player.paused) {
-          player.play();
-        } else {
-          player.pause();
-        }
-      }
-    });
-
-    // 播放状态变化
-    player.addEventListener('play', () => {
-      if (playIcon) playIcon.style.display = 'none';
-      if (pauseIcon) pauseIcon.style.display = 'block';
-    });
-
-    player.addEventListener('pause', () => {
-      if (playIcon) playIcon.style.display = 'block';
-      if (pauseIcon) pauseIcon.style.display = 'none';
-    });
-
-    // 进度更新
-    player.addEventListener('timeupdate', () => {
-      if (!player.duration || !progressFill) return;
-      const percent = (player.currentTime / player.duration) * 100;
-      const circumference = 100.531;
-      const dashoffset = circumference - (percent / 100) * circumference;
-      progressFill.style.strokeDasharray = `${circumference} ${circumference}`;
-      progressFill.style.strokeDashoffset = dashoffset;
-    });
-
-    playerControlsInitialized = true;
+    PlayerControls.init();
   }
 
   async function init() {
@@ -1051,28 +1069,61 @@ const BibleModule = (function() {
 
 // ========== 资料模块 ==========
 const ResourcesModule = (function() {
+  // 分类 -> R2 子目录 + 展示的文件类型
+  // 目录结构：resources/audio/*.mp3、resources/video/*.mp4、resources/pdf/*.pdf
+  const TYPES = {
+    all:   { dir: 'resources/',       ext: 'mp3,wav,mp4,mov,avi,pdf', empty: '暂无内容' },
+    pdf:   { dir: 'resources/pdf/',   ext: 'pdf',                     empty: '暂无 PDF' },
+    audio: { dir: 'resources/audio/', ext: 'mp3,wav',                 empty: '暂无音频' },
+    video: { dir: 'resources/video/', ext: 'mp4,mov,avi',             empty: '暂无视频' }
+  };
+  const AUDIO_EXTS = ['mp3', 'wav'];
+  const VIDEO_EXTS = ['mp4', 'mov', 'avi'];
+
   let songs = [];
   let currentType = 'all';
 
-  async function loadList() {
-    let dir = 'resources/';
-    if (currentType !== 'all') {
-      dir += currentType + '/';
-    }
+  function extOf(name) {
+    return (String(name).split('.').pop() || '').toLowerCase();
+  }
 
+  // 由扩展名推断所属子目录（接口未返回完整 key 时用于补全）
+  function dirOf(name) {
+    const ext = extOf(name);
+    if (AUDIO_EXTS.includes(ext)) return 'resources/audio/';
+    if (VIDEO_EXTS.includes(ext)) return 'resources/video/';
+    return 'resources/pdf/';
+  }
+
+  function iconOf(ext) {
+    if (ext === 'pdf') return '📕';
+    if (AUDIO_EXTS.includes(ext)) return '🎵';
+    if (VIDEO_EXTS.includes(ext)) return '🎬';
+    return '📄';
+  }
+
+  async function loadList() {
     const listEl = document.getElementById("resourcesList");
     if (!listEl) return;
 
-    const res = await fetch(`${API_BASE}/api/list?dir=${encodeURIComponent(dir)}`);
-    if (!res.ok) {
+    const type = TYPES[currentType] || TYPES.all;
+    listEl.innerHTML = '<li class="song-item">加载中…</li>';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/list?dir=${encodeURIComponent(type.dir)}&ext=${encodeURIComponent(type.ext)}`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const names = Array.isArray(data.songs) ? data.songs : [];
+      const keys = Array.isArray(data.keys) ? data.keys : null;
+      songs = names.map((name, i) => ({
+        name: name,
+        // 优先使用接口返回的完整 R2 key（含 audio/video 子目录）；旧接口只给文件名，则按分类目录补全
+        key: (keys && keys[i]) ? keys[i] : (currentType === 'all' ? dirOf(name) : type.dir) + name
+      }));
+    } catch (e) {
       listEl.innerHTML = '<li class="song-item">加载失败</li>';
       return;
     }
-    const data = await res.json();
-    songs = Array.isArray(data.songs) ? data.songs.map(name => ({
-      name: name,
-      key: dir + name
-    })) : [];
     renderList();
   }
 
@@ -1080,42 +1131,39 @@ const ResourcesModule = (function() {
     const listEl = document.getElementById("resourcesList");
     if (!listEl) return;
 
+    const type = TYPES[currentType] || TYPES.all;
     listEl.innerHTML = "";
     if (songs.length === 0) {
-      listEl.innerHTML = '<li class="song-item">暂无内容</li>';
+      listEl.innerHTML = `<li class="song-item">${type.empty}</li>`;
       return;
     }
     songs.forEach((s) => {
       const li = document.createElement('li');
       li.className = 'song-item';
 
-      const ext = s.name.split('.').pop().toLowerCase();
-      let icon = '📄';
-      if (ext === 'pdf') icon = '📕';
-      else if (['mp3', 'wav'].includes(ext)) icon = '🎵';
-      else if (['mp4', 'mov', 'avi'].includes(ext)) icon = '🎬';
-
-      li.innerHTML = `<div class="song-name">${icon} ${escapeHtml(s.name)}</div>`;
+      li.innerHTML = `<div class="song-name">${iconOf(extOf(s.name))} ${escapeHtml(s.name)}</div>`;
       li.onclick = () => openResource(s);
       listEl.appendChild(li);
     });
   }
 
   function openResource(s) {
-    const url = `${API_BASE}/api/file/${encodeURIComponent(s.key)}`;
-    const ext = s.name.split('.').pop().toLowerCase();
+    // 播放地址 = 公开域名 + 完整 R2 key：resources/audio/xxx.mp3、resources/video/xxx.mp4
+    const url = buildFileUrl(s.key);
+    const ext = extOf(s.name);
 
-    if (['mp3', 'wav'].includes(ext)) {
+    if (AUDIO_EXTS.includes(ext)) {
       const player = document.getElementById("player");
-      const songInfoContent = document.getElementById("songInfoContent");
+      if (!player) return;
       player.src = url;
       player.play().catch(()=>{});
+      const songInfoContent = document.getElementById("songInfoContent");
       if (songInfoContent) {
         songInfoContent.textContent = s.name;
       }
-      if (PraiseModule.showMiniPlayer) {
-        PraiseModule.showMiniPlayer();
-      }
+      // 直接进资料页播放时，迷你播放器控件也要可用
+      PlayerControls.init();
+      PraiseModule.showMiniPlayer();
     } else {
       window.open(url, '_blank');
     }
@@ -1125,9 +1173,10 @@ const ResourcesModule = (function() {
     const menuBtns = document.querySelectorAll('[data-page="resources"] .menu-btn');
     menuBtns.forEach(btn => {
       btn.addEventListener('click', async () => {
+        if (btn.classList.contains('active')) return;
         menuBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        currentType = btn.dataset.type;
+        currentType = btn.dataset.type || 'all';
         await loadList();
       });
     });

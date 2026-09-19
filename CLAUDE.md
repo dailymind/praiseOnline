@@ -13,19 +13,20 @@ A Cloudflare-based hymn player (赞美诗播放器) with MP3 streaming from R2 s
 
 ### Frontend (`pages/`)
 - Single-page application with no build step (vanilla JS)
-- `app.js`: Main application logic (~580 lines)
+- `app.js`: Main application logic (data modules + shared `PlayerControls`)
   - Audio player with play modes (sequential, single-loop, random)
   - Real-time filtering and search with localStorage persistence
   - Recent playlist tracking (last 10 songs)
   - Timer functionality for auto-stop
   - Mobile-responsive UI with overlays and FABs
 - API base URL is injected via meta tag `<meta name="api-base" content="__API_BASE__">` during deployment
+- Media playback uses `<meta name="file-base" content="__FILE_BASE__">` (public R2 domain, secret `FILE_DOMAIN`). `buildFileUrl(key)` in `pages/app.js` builds `{file-base}/{R2 key}` with per-segment `encodeURIComponent` (slashes preserved). Empty/placeholder value falls back to `https://r2files.242500.xyz`
 - State persistence: filter mode, sort order, and search query stored in localStorage with `praise_*` prefix
 
 ### Backend (`worker/index.js`)
 - Cloudflare Worker with two main endpoints:
-  - `GET /api/list?dir=<path>`: Lists MP3 files from R2 bucket (limit: 1000)
-  - `GET /api/file/<encoded-key>`: Streams MP3 file from R2
+  - `GET /api/list?dir=<path>&ext=<exts>`: Lists files from R2 bucket (limit: 1000). `ext` is a comma separated extension filter (default `mp3`); the JSON response contains `songs` (file names) and `keys` (full R2 keys, used by the frontend to build playback URLs, including the `resources/audio/` and `resources/video/` sub-directories)
+  - `GET /api/file/<encoded-key>`: Streams MP3 file from R2 (kept for legacy links and playback-state restore; the frontend now plays media straight from the public R2 domain)
 - CORS enabled for all origins
 - R2 binding: `env.R2_BUCKET`
 
@@ -36,11 +37,16 @@ praise/
 ├── 大本/
 ├── 新编/
 └── 少儿/
+
+resources/
+├── audio/   # 资料 - 音频
+├── video/   # 资料 - 视频
+└── pdf/     # 资料 - PDF
 ```
 
 ### Configuration & Deployment
 All sensitive values use placeholders that are replaced during CI/CD:
-- `__API_BASE__` in `pages/index.html`
+- `__API_BASE__`, `__FILE_BASE__` in `pages/index.html`
 - `__BUCKET_NAME__`, `__API_DOMAIN__`, `__ZONE_NAME__` in `worker/wrangler.toml`
 
 ## Development Commands
