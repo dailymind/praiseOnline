@@ -24,11 +24,15 @@ A Cloudflare-based hymn player (赞美诗播放器) with MP3 streaming from R2 s
 - State persistence: filter mode, sort order, and search query stored in localStorage with `praise_*` prefix
 
 ### Backend (`worker/index.js`)
-- Cloudflare Worker with two main endpoints:
+- Cloudflare Worker endpoints:
   - `GET /api/list?dir=<path>&ext=<exts>`: Lists files from R2 bucket (limit: 1000). `ext` is a comma separated extension filter (default `mp3`); the JSON response contains `songs` (file names) and `keys` (full R2 keys, used by the frontend to build playback URLs, including the `resources/audio/` and `resources/video/` sub-directories)
   - `GET /api/file/<encoded-key>`: Streams MP3 file from R2 (kept for legacy links and playback-state restore; the frontend now plays media straight from the public R2 domain)
+  - `GET /api/bible/books`: Book list from the D1 table `bible_volume`
+  - `GET /api/bible/chapter?book=<volume_id>&chapter=<chapter_sn>`: Verses of one chapter from the D1 table `bible_verses`
+  - `GET /api/bible/file/<filename>`: Legacy plain-text Bible file from R2 (`bible/*.txt`), kept for compatibility
 - CORS enabled for all origins
-- R2 binding: `env.R2_BUCKET`
+- Bindings: `env.R2_BUCKET` (R2) and `env.DB` (D1; `BIBLE_DB` / `bible_db` are also accepted)
+- Bible data lives in D1: `bible_volume(id, name, name_short, pinyin, pinyin_short, chapter_total, testament_sn 0=旧约/1=新约, kind_sn)` and `bible_verses(id, volume_id, chapter_sn, verse_sn, verse_txt)`
 
 ### Expected R2 Directory Structure
 ```
@@ -47,7 +51,8 @@ resources/
 ### Configuration & Deployment
 All sensitive values use placeholders that are replaced during CI/CD:
 - `__API_BASE__`, `__FILE_BASE__` in `pages/index.html`
-- `__BUCKET_NAME__`, `__API_DOMAIN__`, `__ZONE_NAME__` in `worker/wrangler.toml`
+- `__BUCKET_NAME__`, `__API_DOMAIN__`, `__ZONE_NAME__`, `__D1_DATABASE_NAME__` in `worker/wrangler.toml`
+- The D1 `database_id` for the Bible data is committed in `worker/wrangler.toml`; the binding must be named `DB`
 
 ## Development Commands
 

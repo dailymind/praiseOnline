@@ -89,6 +89,7 @@ Set these repository Secrets in GitHub (Settings → Secrets and variables → A
 - `BUCKET_NAME` — R2 bucket name; workflow replaces `__BUCKET_NAME__` in `worker/wrangler.toml`.
 - `PREVIEW_BUCKET_NAME` — preview bucket name; replaces `__PREVIEW_BUCKET_NAME__`.
 - `API_DOMAIN` — your API domain, e.g. `papi.yourdomain.com`; replaces `__API_DOMAIN__`.
+- `D1_DATABASE_NAME` — name of the D1 database holding the Bible data; replaces `__D1_DATABASE_NAME__` in `worker/wrangler.toml`.
 - `ZONE_NAME` — (optional) Cloudflare zone root, e.g. `yourdomain.com`. If omitted, the workflow will try to derive it from `API_DOMAIN`.
 
 Note: If you use a build step for Cloudflare Pages, you can add an environment variable `API_BASE` in the Pages project settings and inject it during build. For pure static sites without a build step, it's recommended to inject `API_BASE` via GitHub Actions or set the meta tag manually in `pages/index.html`.
@@ -135,6 +136,7 @@ npx wrangler pages deploy pages --project-name=praise-web
   - Hymns: `praise/附录/`, `praise/大本/`, `praise/新编/`
   - Materials: audio under `resources/audio/`, video under `resources/video/`, PDFs under `resources/pdf/`
 - The Worker `list` API defaults to 1000 items; edit `worker/index.js` to change.
+- Bible data lives in D1 (`bible_volume`, `bible_verses`); add a D1 binding named `DB` to the Worker. The frontend reads it through `/api/bible/books` and `/api/bible/chapter?book=<id>&chapter=<n>`.
 - `GET /api/list?dir=<dir>&ext=<extensions>`: `ext` is a comma separated list (e.g. `mp3,mp4,pdf`); when omitted only mp3 is returned. The response keeps `songs` (file names) and adds `keys` (full R2 keys including sub-directories) which the frontend uses to build playback URLs.
 - After changing Worker code, redeploy with: `cd worker && npx wrangler deploy`.
 - Use GitHub Secrets (for example `CLOUDFLARE_API_TOKEN`) to keep tokens safe when automating deployments.

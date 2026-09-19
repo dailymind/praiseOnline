@@ -836,153 +836,99 @@ const WordsModule = (function() {
 // ========== 圣经模块 ==========
 const BibleModule = (function() {
   let booksView, chaptersView, contentView;
-  let currentBook = null;
   let allBooks = [];
+  // bookId -> { chapterSn: verses[] }
+  const chapterCache = new Map();
 
-  // 圣经书卷列表
-  const bibleBooks = [
-    // 旧约 39卷
-    { id: 1, name: '创世记', file: '01-创世记.txt', chapters: 50 },
-    { id: 2, name: '出埃及记', file: '02-出埃及记.txt', chapters: 40 },
-    { id: 3, name: '利未记', file: '03-利未记.txt', chapters: 27 },
-    { id: 4, name: '民数记', file: '04-民数记.txt', chapters: 36 },
-    { id: 5, name: '申命记', file: '05-申命记.txt', chapters: 34 },
-    { id: 6, name: '约书亚记', file: '06-约书亚记.txt', chapters: 24 },
-    { id: 7, name: '士师记', file: '07-士师记.txt', chapters: 21 },
-    { id: 8, name: '路得记', file: '08-路得记.txt', chapters: 4 },
-    { id: 9, name: '撒母耳记上', file: '09-撒母耳记上.txt', chapters: 31 },
-    { id: 10, name: '撒母耳记下', file: '10-撒母耳记下.txt', chapters: 24 },
-    { id: 11, name: '列王纪上', file: '11-列王纪上.txt', chapters: 22 },
-    { id: 12, name: '列王纪下', file: '12-列王纪下.txt', chapters: 25 },
-    { id: 13, name: '历代志上', file: '13-历代志上.txt', chapters: 29 },
-    { id: 14, name: '历代志下', file: '14-历代志下.txt', chapters: 36 },
-    { id: 15, name: '以斯拉记', file: '15-以斯拉记.txt', chapters: 10 },
-    { id: 16, name: '尼希米记', file: '16-尼希米记.txt', chapters: 13 },
-    { id: 17, name: '以斯帖记', file: '17-以斯帖记.txt', chapters: 10 },
-    { id: 18, name: '约伯记', file: '18-约伯记.txt', chapters: 42 },
-    { id: 19, name: '诗篇', file: '19-诗篇.txt', chapters: 150 },
-    { id: 20, name: '箴言', file: '20-箴言.txt', chapters: 31 },
-    { id: 21, name: '传道书', file: '21-传道书.txt', chapters: 12 },
-    { id: 22, name: '雅歌', file: '22-雅歌.txt', chapters: 8 },
-    { id: 23, name: '以赛亚书', file: '23-以赛亚书.txt', chapters: 66 },
-    { id: 24, name: '耶利米书', file: '24-耶利米书.txt', chapters: 52 },
-    { id: 25, name: '耶利米哀歌', file: '25-耶利米哀歌.txt', chapters: 5 },
-    { id: 26, name: '以西结书', file: '26-以西结书.txt', chapters: 48 },
-    { id: 27, name: '但以理书', file: '27-但以理书.txt', chapters: 12 },
-    { id: 28, name: '何西阿书', file: '28-何西阿书.txt', chapters: 14 },
-    { id: 29, name: '约珥书', file: '29-约珥书.txt', chapters: 3 },
-    { id: 30, name: '阿摩司书', file: '30-阿摩司书.txt', chapters: 9 },
-    { id: 31, name: '俄巴底亚书', file: '31-俄巴底亚书.txt', chapters: 1 },
-    { id: 32, name: '约拿书', file: '32-约拿书.txt', chapters: 4 },
-    { id: 33, name: '弥迦书', file: '33-弥迦书.txt', chapters: 7 },
-    { id: 34, name: '那鸿书', file: '34-那鸿书.txt', chapters: 3 },
-    { id: 35, name: '哈巴谷书', file: '35-哈巴谷书.txt', chapters: 3 },
-    { id: 36, name: '西番雅书', file: '36-西番雅书.txt', chapters: 3 },
-    { id: 37, name: '哈该书', file: '37-哈该书.txt', chapters: 2 },
-    { id: 38, name: '撒迦利亚书', file: '38-撒迦利亚书.txt', chapters: 14 },
-    { id: 39, name: '玛拉基书', file: '39-玛拉基书.txt', chapters: 4 },
-    // 新约 27卷
-    { id: 40, name: '马太福音', file: '40-马太福音.txt', chapters: 28 },
-    { id: 41, name: '马可福音', file: '41-马可福音.txt', chapters: 16 },
-    { id: 42, name: '路加福音', file: '42-路加福音.txt', chapters: 24 },
-    { id: 43, name: '约翰福音', file: '43-约翰福音.txt', chapters: 21 },
-    { id: 44, name: '使徒行传', file: '44-使徒行传.txt', chapters: 28 },
-    { id: 45, name: '罗马书', file: '45-罗马书.txt', chapters: 16 },
-    { id: 46, name: '哥林多前书', file: '46-哥林多前书.txt', chapters: 16 },
-    { id: 47, name: '哥林多后书', file: '47-哥林多后书.txt', chapters: 13 },
-    { id: 48, name: '加拉太书', file: '48-加拉太书.txt', chapters: 6 },
-    { id: 49, name: '以弗所书', file: '49-以弗所书.txt', chapters: 6 },
-    { id: 50, name: '腓立比书', file: '50-腓立比书.txt', chapters: 4 },
-    { id: 51, name: '歌罗西书', file: '51-歌罗西书.txt', chapters: 4 },
-    { id: 52, name: '帖撒罗尼迦前书', file: '52-帖撒罗尼迦前书.txt', chapters: 5 },
-    { id: 53, name: '帖撒罗尼迦后书', file: '53-帖撒罗尼迦后书.txt', chapters: 3 },
-    { id: 54, name: '提摩太前书', file: '54-提摩太前书.txt', chapters: 6 },
-    { id: 55, name: '提摩太后书', file: '55-提摩太后书.txt', chapters: 4 },
-    { id: 56, name: '提多书', file: '56-提多书.txt', chapters: 3 },
-    { id: 57, name: '腓利门书', file: '57-腓利门书.txt', chapters: 1 },
-    { id: 58, name: '希伯来书', file: '58-希伯来书.txt', chapters: 13 },
-    { id: 59, name: '雅各书', file: '59-雅各书.txt', chapters: 5 },
-    { id: 60, name: '彼得前书', file: '60-彼得前书.txt', chapters: 5 },
-    { id: 61, name: '彼得后书', file: '61-彼得后书.txt', chapters: 3 },
-    { id: 62, name: '约翰一书', file: '62-约翰一书.txt', chapters: 5 },
-    { id: 63, name: '约翰二书', file: '63-约翰二书.txt', chapters: 1 },
-    { id: 64, name: '约翰三书', file: '64-约翰三书.txt', chapters: 1 },
-    { id: 65, name: '犹大书', file: '65-犹大书.txt', chapters: 1 },
-    { id: 66, name: '启示录', file: '66-启示录.txt', chapters: 22 }
-  ];
+  function setView(view) {
+    if (booksView) booksView.style.display = view === 'books' ? 'block' : 'none';
+    if (chaptersView) chaptersView.style.display = view === 'chapters' ? 'block' : 'none';
+    if (contentView) contentView.style.display = view === 'content' ? 'block' : 'none';
+  }
 
-  function loadBooks() {
+  // 书卷列表：GET /api/bible/books（来自 D1 bible_volume）
+  async function loadBooks() {
     booksView = document.getElementById("bibleBooksView");
     chaptersView = document.getElementById("bibleChaptersView");
     contentView = document.getElementById("bibleContentView");
-
     if (!booksView) return;
 
-    allBooks = bibleBooks;
-    renderBooks(allBooks);
+    setView('books');
+    booksView.innerHTML = '<p class="bible-hint">加载中…</p>';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/bible/books`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      allBooks = Array.isArray(data.books) ? data.books : (Array.isArray(data) ? data : []);
+      if (allBooks.length === 0) {
+        booksView.innerHTML = '<p class="bible-hint">暂无书卷数据</p>';
+        return;
+      }
+      renderBooks(allBooks);
+    } catch (e) {
+      booksView.innerHTML = '<p class="bible-hint">加载失败，请稍后重试</p>';
+    }
   }
 
   function renderBooks(books) {
     if (!booksView) return;
-
+    setView('books');
     booksView.innerHTML = '';
-    booksView.style.display = 'block';
-    if (chaptersView) chaptersView.style.display = 'none';
-    if (contentView) contentView.style.display = 'none';
 
-    const oldTestament = books.slice(0, 39);
-    const newTestament = books.slice(39);
+    // testament_sn：0 = 旧约，1 = 新约
+    const groups = [
+      { title: '旧约', list: books.filter(b => Number(b.testament) === 0) },
+      { title: '新约', list: books.filter(b => Number(b.testament) === 1) }
+    ];
 
-    const renderGroup = (title, bookList) => {
+    groups.forEach(({ title, list }) => {
+      if (list.length === 0) return;
+
       const group = document.createElement('div');
       const h3 = document.createElement('h3');
       h3.className = 'bible-group-title';
-      h3.textContent = title;
+      h3.textContent = `${title}（${list.length}卷）`;
       group.appendChild(h3);
 
-      const list = document.createElement('div');
-      list.className = 'bible-books-list';
+      const wrap = document.createElement('div');
+      wrap.className = 'bible-books-list';
 
-      bookList.forEach(book => {
+      list.forEach(book => {
         const btn = document.createElement('button');
         btn.className = 'bible-book-btn';
         btn.textContent = book.name;
+        btn.title = `${book.name} 共${book.chapters}章`;
         btn.onclick = () => selectBook(book);
-        list.appendChild(btn);
+        wrap.appendChild(btn);
       });
-      group.appendChild(list);
-      booksView.appendChild(group);
-    };
 
-    renderGroup('旧约', oldTestament);
-    renderGroup('新约', newTestament);
+      group.appendChild(wrap);
+      booksView.appendChild(group);
+    });
   }
 
   function selectBook(book) {
-    currentBook = book;
     renderChapters(book);
   }
 
   function renderChapters(book) {
     if (!booksView || !chaptersView) return;
+    setView('chapters');
 
-    booksView.style.display = 'none';
-    chaptersView.style.display = 'block';
-    if (contentView) contentView.style.display = 'none';
-
-    chaptersView.innerHTML = `<h2 class="bible-chapter-title">${book.name}</h2>`;
+    chaptersView.innerHTML = `<h2 class="bible-chapter-title">${escapeHtml(book.name)}</h2>`;
 
     const grid = document.createElement('div');
     grid.className = 'chapters-grid';
 
-    for (let i = 1; i <= book.chapters; i++) {
+    const total = Number(book.chapters) || 0;
+    for (let i = 1; i <= total; i++) {
       const btn = document.createElement('button');
       btn.className = 'chapter-btn';
       btn.textContent = `第${i}章`;
       btn.onclick = () => loadChapter(book, i);
       grid.appendChild(btn);
     }
-
     chaptersView.appendChild(grid);
 
     const backBtn = document.createElement('button');
@@ -992,45 +938,60 @@ const BibleModule = (function() {
     chaptersView.appendChild(backBtn);
   }
 
+  // 单章经文：GET /api/bible/chapter?book=<volume_id>&chapter=<chapter_sn>
   async function loadChapter(book, chapter) {
     if (!contentView) return;
+    setView('content');
+    contentView.innerHTML = `<div class="bible-content-wrapper">
+        <h2 class="bible-chapter-title">${escapeHtml(book.name)} 第${chapter}章</h2>
+        <p class="bible-hint">加载中…</p>
+      </div>`;
 
-    // 尝试从 API 加载
-    const res = await fetch(`${API_BASE}/api/bible/file/${encodeURIComponent(book.file)}`);
+    const cached = chapterCache.get(book.id);
+    let verses = cached ? cached[chapter] : null;
 
-    if (!res.ok) {
-      contentView.innerHTML = '<p class="bible-content">加载失败，请确保圣经文件已上传到 R2。</p>';
-      chaptersView.style.display = 'none';
-      contentView.style.display = 'block';
-      return;
+    if (!verses) {
+      try {
+        const res = await fetch(`${API_BASE}/api/bible/chapter?book=${encodeURIComponent(book.id)}&chapter=${encodeURIComponent(chapter)}`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        verses = Array.isArray(data.verses) ? data.verses : [];
+        const bucket = chapterCache.get(book.id) || {};
+        bucket[chapter] = verses;
+        chapterCache.set(book.id, bucket);
+      } catch (e) {
+        contentView.innerHTML = `<div class="bible-content-wrapper">
+            <h2 class="bible-chapter-title">${escapeHtml(book.name)} 第${chapter}章</h2>
+            <p class="bible-hint">加载失败，请稍后重试</p>
+          </div>`;
+        appendBackToChapters(book);
+        return;
+      }
     }
 
-    const content = await res.text();
-    renderContent(content, book, chapter);
+    renderChapter(book, chapter, verses);
   }
 
-  function renderContent(content, book, chapter) {
-    if (!booksView || !chaptersView || !contentView) return;
+  function renderChapter(book, chapter, verses) {
+    if (!contentView) return;
+    setView('content');
 
-    booksView.style.display = 'none';
-    chaptersView.style.display = 'none';
-    contentView.style.display = 'block';
+    const body = verses.length === 0
+      ? '<p class="bible-hint">该章暂无经文数据</p>'
+      : `<div class="bible-verses">${verses.map(v =>
+          `<p><span class="bible-verse-num">${escapeHtml(String(v.verse))}</span>${escapeHtml(v.text)}</p>`
+        ).join('')}</div>`;
 
-    // 解析章节内容（假设用 ===第N章=== 分隔）
-    const chapters = content.split(/===第\d+章===/);
-    const chapterContent = chapters[chapter] || content;
+    contentView.innerHTML = `<div class="bible-content-wrapper">
+        <h2 class="bible-chapter-title">${escapeHtml(book.name)} 第${chapter}章</h2>
+        ${body}
+      </div>`;
 
-    // 解析经文
-    const verses = parseVerses(chapterContent);
+    appendBackToChapters(book);
+  }
 
-    contentView.innerHTML = `
-      <div class="bible-content-wrapper">
-        <h2 class="bible-chapter-title">${book.name} 第${chapter}章</h2>
-        <div class="bible-verses">${verses}</div>
-      </div>
-    `;
-
-    // 添加返回按钮
+  function appendBackToChapters(book) {
+    if (!contentView) return;
     const backBtn = document.createElement('button');
     backBtn.className = 'back-btn';
     backBtn.textContent = '← 返回章节';
@@ -1038,24 +999,10 @@ const BibleModule = (function() {
     contentView.appendChild(backBtn);
   }
 
-  function parseVerses(text) {
-    // 简单解析：尝试匹配 "1 经文" 格式
-    const lines = text.trim().split('\n');
-    return lines.map(line => {
-      const match = line.match(/^(\d+)\s+(.+)$/);
-      if (match) {
-        return `<p><span class="bible-verse-num">${match[1]}</span>${escapeHtml(match[2])}</p>`;
-      }
-      if (line.trim()) {
-        return `<p>${escapeHtml(line)}</p>`;
-      }
-      return '';
-    }).filter(Boolean).join('');
-  }
-
-  function init() {
-    if (BibleModule._initialized) return;
-    loadBooks();
+  async function init() {
+    // 已经加载过书卷就直接复用当前视图（返回时保留阅读位置）
+    if (BibleModule._initialized && allBooks.length > 0) return;
+    await loadBooks();
     BibleModule._initialized = true;
   }
 
@@ -1066,7 +1013,6 @@ const BibleModule = (function() {
     _initialized: false
   };
 })();
-
 // ========== 资料模块 ==========
 const ResourcesModule = (function() {
   // 分类 -> R2 子目录 + 展示的文件类型
