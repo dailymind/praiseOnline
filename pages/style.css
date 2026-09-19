@@ -1142,6 +1142,13 @@ textarea,
 }
 
 /* ========== 圣经模块样式 ========== */
+.bible-hint {
+  margin: 24px 0;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
 .bible-group-title {
   font-size: 16px;
   font-weight: 600;

@@ -22,6 +22,7 @@ jobs:
           sed -i "s|__BUCKET_NAME__|${{ secrets.BUCKET_NAME }}|g" worker/wrangler.toml
           sed -i "s|__API_DOMAIN__|${{ secrets.API_DOMAIN }}|g" worker/wrangler.toml
           sed -i "s|__ZONE_NAME__|${{ secrets.ZONE_NAME }}|g" worker/wrangler.toml
+          sed -i "s|__D1_DATABASE_NAME__|${{ secrets.D1_DATABASE_NAME }}|g" worker/wrangler.toml
           
           # 替换 pages/index.html 中的 API_BASE
           sed -i "s|__API_BASE__|${{ secrets.API_DOMAIN }}|g" pages/index.html

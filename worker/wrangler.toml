@@ -7,6 +7,14 @@ binding = "R2_BUCKET"
 bucket_name = "__BUCKET_NAME__"
 preview_bucket_name = "__BUCKET_NAME__"
 
+# D1：圣经数据（bible_volume / bible_verses）
+# binding 名保持为 DB（worker/index.js 读取 env.DB，另外兼容 BIBLE_DB / bible_db）
+# database_name 由 CI 用 D1_DATABASE_NAME secret 替换，本地部署时替换成你 D1 里的库名
+[[d1_databases]]
+binding = "DB"
+database_name = "__D1_DATABASE_NAME__"
+database_id = "e2550753-949c-40f0-b4d0-6468310a1f6f"
+
 # routes 应该在顶级配置中
 [[routes]]
 pattern = "__API_DOMAIN__/*"

@@ -66,6 +66,7 @@ routes = [
   - `BUCKET_NAME`：R2 存储桶名，用于替换 `worker/wrangler.toml` 中 `__BUCKET_NAME__` 占位符。
   - `PREVIEW_BUCKET_NAME`：预览存储桶名，用于替换 `__PREVIEW_BUCKET_NAME__`。
   - `API_DOMAIN`：你的 API 自定义域名（例如 `papi.yourdomain.com`），用于替换 `__API_DOMAIN__`。
+  - `D1_DATABASE_NAME`：D1 数据库名（圣经数据），用于替换 `worker/wrangler.toml` 中的 `__D1_DATABASE_NAME__`。
   - `ZONE_NAME`：可选，Cloudflare zone（例如 `yourdomain.com`）。如果不填写，工作流会尝试从 `API_DOMAIN` 中自动推断（去掉子域名）。
 
 注意：如果你使用 Cloudflare Pages 的构建（有构建步骤），也可以在 Cloudflare Pages 的项目设置中添加环境变量 `API_BASE` 并在构建脚本中注入到页面；对于纯静态无构建流程，建议通过 GitHub Actions 注入或直接在 `pages/index.html` 中手工设置 meta 标签。
@@ -155,6 +156,7 @@ npx wrangler pages deploy pages --project-name=praise-web
 - Worker 的 `list` 接口默认限制 1000 条，如需修改请编辑 `worker/index.js`
 - `GET /api/list?dir=<目录>&ext=<扩展名>`：`ext` 逗号分隔（如 `mp3,mp4,pdf`），不传时只返回 mp3；响应除 `songs`（文件名）外新增 `keys`（完整 R2 key，含子目录），前端用它拼接播放地址
 - 首次部署后需要在 Cloudflare Dashboard 中配置 Pages 的自定义域名（可选）
+- 圣经数据存放在 D1 数据库（表 `bible_volume`、`bible_verses`），需要在 Worker 上添加一个 D1 绑定，变量名用 `DB`；前端通过 `/api/bible/books` 与 `/api/bible/chapter?book=<id>&chapter=<章号>` 读取
 - Worker 已配置 CORS 支持，允许跨域访问
 - 修改 Worker 代码后需要重新部署：`cd worker && npx wrangler deploy`
 
