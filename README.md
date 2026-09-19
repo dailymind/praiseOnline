@@ -62,6 +62,7 @@ routes = [
   - `CLOUDFLARE_API_TOKEN`：Cloudflare API Token（需要 Worker/Pages/R2 权限，或使用细粒度 Token）。
   - `CLOUDFLARE_PAGES_PROJECT_NAME`：可选，Pages 项目名（若希望 CI 部署 Pages）。
   - `API_BASE`：可选，前端使用的 API 地址（例如 `https://papi.yourdomain.com`），工作流会将其注入到 `pages/index.html`。
+  - `FILE_DOMAIN`：可选，R2 公开域名（例如 `https://r2files.242500.xyz`），用于替换 `pages/index.html` 中的 `__FILE_BASE__`；留空时前端回退到默认值。
   - `BUCKET_NAME`：R2 存储桶名，用于替换 `worker/wrangler.toml` 中 `__BUCKET_NAME__` 占位符。
   - `PREVIEW_BUCKET_NAME`：预览存储桶名，用于替换 `__PREVIEW_BUCKET_NAME__`。
   - `API_DOMAIN`：你的 API 自定义域名（例如 `papi.yourdomain.com`），用于替换 `__API_DOMAIN__`。
@@ -114,9 +115,21 @@ Pages 前端读取 Worker API 地址（可注入）：
 
 ```html
 <meta name="api-base" content="__API_BASE__" />
+<meta name="file-base" content="__FILE_BASE__" />
 ```
 
-运行时，`pages/app.js` 会读取该 meta 值；如果未被替换，页面会回退到默认 `https://papi.yourdomain.com`。
+运行时，`pages/app.js` 会读取这两个 meta 值：
+
+- `api-base`：Worker API 根地址（列表、圣经等接口）。未被替换时回退到默认 `https://papi.yourdomain.com`。
+- `file-base`：R2 公开域名，音频 / PDF 等媒体直链由此拼接，不再经过 Worker 的 `/api/file/<encoded-key>`；由工作流用 GitHub Secret `FILE_DOMAIN`（例如 `https://r2files.242500.xyz`）替换 `__FILE_BASE__`，留空或未替换时回退到默认 `https://r2files.242500.xyz`。
+
+播放地址按“逐段编码”拼接为 `{file-base}/{R2 key}`：目录分隔符 `/` 保留，其余字符逐个 `encodeURIComponent`。例如 R2 key `praise/附录/001.将这山地赐给我.mp3` 的播放地址为：
+
+```
+https://r2files.242500.xyz/praise/%E9%99%84%E5%BD%95/001.%E5%B0%86%E8%BF%99%E5%B1%B1%E5%9C%B0%E8%B5%90%E7%BB%99%E6%88%91.mp3
+```
+
+Worker 的 `/api/file/<encoded-key>` 仍然保留，用于兼容旧链接以及刷新页面后恢复播放状态。
 
 ### 5️⃣ 初始化 Pages 项目（仅首次）
 
@@ -136,11 +149,11 @@ npx wrangler pages deploy pages --project-name=praise-web
 
 ## 注意事项
 
-- 确保 R2 存储桶中的 MP3 文件按以下目录结构组织：
-  - `praise/附录/`
-  - `praise/大本/`
-  - `praise/新编/`
+- 确保 R2 存储桶中的文件按以下目录结构组织：
+  - 赞美诗：`praise/附录/`、`praise/大本/`、`praise/新编/`
+  - 资料：「音频」放在 `resources/audio/`，「视频」放在 `resources/video/`，PDF 放在 `resources/pdf/`
 - Worker 的 `list` 接口默认限制 1000 条，如需修改请编辑 `worker/index.js`
+- `GET /api/list?dir=<目录>&ext=<扩展名>`：`ext` 逗号分隔（如 `mp3,mp4,pdf`），不传时只返回 mp3；响应除 `songs`（文件名）外新增 `keys`（完整 R2 key，含子目录），前端用它拼接播放地址
 - 首次部署后需要在 Cloudflare Dashboard 中配置 Pages 的自定义域名（可选）
 - Worker 已配置 CORS 支持，允许跨域访问
 - 修改 Worker 代码后需要重新部署：`cd worker && npx wrangler deploy`

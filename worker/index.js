@@ -21,14 +21,23 @@ export default {
         "Access-Control-Allow-Headers": "Content-Type",
       };
 
-      // 1️⃣ /api/list?dir=xxx
+      // 1️⃣ /api/list?dir=xxx&ext=mp3,mp4,pdf
       if (path === "/api/list") {
         const prefix = url.searchParams.get("dir") || "praise/附录/";
+        // ext：逗号分隔的扩展名过滤，未传时保持老行为（只返回 mp3）
+        const exts = (url.searchParams.get("ext") || "mp3")
+          .split(",")
+          .map(e => e.trim().toLowerCase().replace(/^\./, ""))
+          .filter(Boolean)
+          .map(e => "." + e);
         const list = await env.R2_BUCKET.list({ prefix, limit: 1000 });
-        const songs = list.objects
-          .filter(o => o.key.endsWith(".mp3"))
-          .map(o => o.key.split("/").pop());
-        return new Response(JSON.stringify({ songs }, null, 2), {
+        const objects = list.objects.filter(o =>
+          exts.some(ext => o.key.toLowerCase().endsWith(ext))
+        );
+        const songs = objects.map(o => o.key.split("/").pop());
+        // keys：完整 R2 key（含 audio/video 等子目录），供前端直接拼接播放地址
+        const keys = objects.map(o => o.key);
+        return new Response(JSON.stringify({ songs, keys }, null, 2), {
           headers: {
             "Content-Type": "application/json",
             ...corsHeaders,
